@@ -1,7 +1,7 @@
 ---
 name: User Story
 about: Create a user story issue
-title: "USER STORY: "
+title: "User Story: "
 labels: ""
 ---
 
