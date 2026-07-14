@@ -1,6 +1,9 @@
 {% load static %}
 
 {% url 'home' as home_url %}
+{% url 'account_login' as login_url %}
+{% url 'account_signup' as signup_url %}
+{% url 'account_logout' as logout_url %}
 
 <!DOCTYPE html>
 <html class="h-100" lang="en">
@@ -73,9 +76,25 @@
                             DJs
                         </a>
                     </li>
-
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_logout' %}">
+                            Logout
+                            </a>
+                    </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_signup' %}">
+                            Register
+                            </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'account_login' %}">
+                            Login
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
-
                 <span class="navbar-text">
                     Discover DJs and live events
                 </span>
@@ -111,6 +130,11 @@
 
     <!-- Main content -->
     <main class="flex-shrink-0">
+        {% if user.is_authenticated %}
+            <p class="text-end m-3">You are logged in as {{ user }}</p>
+            {% else %}
+            <p class="text-end m-3">You are not logged in</p>
+        {% endif %}
         {% block content %}
         {% endblock content %}
     </main>
