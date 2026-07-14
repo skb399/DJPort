@@ -1,19 +1,5 @@
-# Virtual environment
+# Created by venv
 .venv/
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Database
-db.sqlite3
-
 # Environment variables
-.env
-
-# Static files, heroku will ignore these files initially
-staticfiles/
-
-# VS Code
-.vscode/
+env.py
