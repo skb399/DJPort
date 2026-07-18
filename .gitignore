@@ -3,3 +3,15 @@
 
 # Environment variables
 env.py
+
+# Ignore the staticfiles directory created by the collectstatic command for Heroku deployment
+staticfiles/
+
+# Ignore the SQLite database file
+__pycache__/
+
+# Ignore Python bytecode files
+*.py[cod]
+
+# Ignore the SQLite database file
+db.sqlite3
