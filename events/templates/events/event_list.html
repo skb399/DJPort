@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1>Events</h1>
+            <p>Discover upcoming DJ events and club nights.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for event in events %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="card-title h4">
+                            {{ event.title }}
+                        </h2>
+
+                        <p class="card-text">
+                            <strong>Date:</strong>
+                            {{ event.date|date:"D d M Y, H:i" }}
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Venue:</strong>
+                            {{ event.venue }}
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Location:</strong>
+                            {{ event.location }}
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Genre:</strong>
+                            {{ event.genre }}
+                        </p>
+
+                        <p class="card-text">
+                            <!-- Crop the description to 25 words for better display -->
+                            {{ event.description|truncatewords:25 }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        <!-- Add a message if there are not events-->    
+        {% empty %}
+            <div class="col-12">
+                <p>No published events are currently available.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
