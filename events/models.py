@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from cloudinary.models import CloudinaryField
 
 
 STATUS = (
@@ -28,23 +29,31 @@ event was created and last updated.
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField()
-    venue = models.CharField(max_length=200)
-    location = models.CharField(max_length=200)
-    date = models.DateTimeField()
-    genre = models.CharField(max_length=100)
     lineup = models.TextField(blank=True)
-    favourited_by = models.ManyToManyField(
-        User,
-        related_name="favourite_events",
-        blank=True
+    featured_image = CloudinaryField(
+    "image",
+    # Allows user to submit an event without an image
+    blank=True,
+    #Means that the database may not store an image value for an event, and the field can be left empty
+    null=True
     )
     # status field to indicate whether the event is a draft or published
     status = models.IntegerField(
         choices=STATUS,
         default=0
     )
+    venue = models.CharField(max_length=200)
+    location = models.CharField(max_length=200)
+    date = models.DateTimeField()
+    genre = models.CharField(max_length=100)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    
+    favourited_by = models.ManyToManyField(
+    User,
+    related_name="favourite_events",
+    blank=True
+)
 
     class Meta:
         ordering = ["date"]
