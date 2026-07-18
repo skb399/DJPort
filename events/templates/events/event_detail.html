@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1>{{ event.title }}</h1>
+            <p><strong>Creator:</strong> {{ event.creator }}</p>
+            <!-- Display the event date in a readable format -->
+            <p><strong>Date:</strong> {{ event.date|date:"D d M Y, H:i" }}</p>
+            <p><strong>Venue:</strong> {{ event.venue }}</p>
+            <p><strong>Location:</strong> {{ event.location }}</p>
+            <p><strong>Genre:</strong> {{ event.genre }}</p>
+            <p><strong>Description:</strong> {{ event.description }}</p>
+            <!-- Display the lineup if it exists -->
+            {% if event.lineup %}
+                <p><strong>Lineup:</strong> {{ event.lineup }}</p>
+            {% endif %}
+            <!-- Display the featured image if it exists-->
+            {% if event.featured_image %}
+                <img
+                    src="{{ event.featured_image.url }}"
+                    alt="{{ event.title }}"
+                    class="img-fluid mt-3"
+                >
+            <!-- If no featured image is available, display a placeholder image -->
+            {% else %}
+                <img
+                    src="{% static 'images/djport_event_placeholder_image.png' %}"
+                    alt="Placeholder event image (no image available)"
+                    class="img-fluid mt-3"
+                >
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
