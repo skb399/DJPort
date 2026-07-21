@@ -67,7 +67,7 @@ def event_create(request):
             # Redirect to the event detail page after successful creation
             return redirect("event_detail", slug=event.slug)
         
-    # Else - If the request method is not POST, create a new instance of the EventForm 
+    # Else -If the request method is not POST, create a new instance of the EventForm 
     # to display an empty form to the user.
     else:
         form = EventForm()
@@ -77,4 +77,3 @@ def event_create(request):
     }
     # Render the event_form.html template with the context containing the form
     return render(request, "events/event_form.html", context)
-
