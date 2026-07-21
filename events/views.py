@@ -1,6 +1,7 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from .models import Event
-
+from .forms import EventForm
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     """
@@ -17,7 +18,8 @@ def event_list(request):
     events = Event.objects.filter(status=1)
 
     # Create a context dictionary to pass the events to the template as Django needs 
-    # a context dictionary to render the template with the events data.
+    # a context dictionary to render the template with the events data. Which the template
+    # can iterate through to display the events.
     context = {
         "events": events,
     }
@@ -40,3 +42,34 @@ def event_detail(request, slug):
     }
 
     return render(request, "events/event_detail.html", context)
+
+# Decorator "@login_required" to ensure that only logged-in users can access the event_create view.
+@login_required
+def event_create(request):
+    """
+    View for creating a new event. Only accessible to logged-in users.
+    """
+    # Check if the request method is POST, which indicates that the user has submitted the form.
+    if request.method == "POST":
+        # Create an instance of the EventForm with the submitted data and files/
+        form = EventForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            # Save the form but don't commit to the database yet, so we can set the creator field
+            event = form.save(commit=False)
+            # Set the creator of the event to the currently logged-in user
+            event.creator = request.user
+            # Save the event to the database after setting the creator field
+            event.save()
+            # Redirect to the event detail page after successful creation
+            return redirect("event_detail", slug=event.slug)
+    # If the request method is not POST, create a new instance of the EventForm 
+    # to display an empty form to the user.
+    else:
+        form = EventForm()
+    # Create a context dictionary to pass the form to the template for rendering
+    context = {
+        "form": form,
+    }
+    # Render the event_form.html template with the context containing the form
+    return render(request, "events/event_form.html", context)

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from cloudinary.models import CloudinaryField
+from django.utils.text import slugify
 
 
 STATUS = (
@@ -57,6 +58,18 @@ event was created and last updated.
 
     class Meta:
         ordering = ["date"]
-
+    
     def __str__(self):
         return self.title
+    
+    # The save method is overridden to automatically generate a slug from the event title before 
+    # saving the event instance to the database. So that each event has a unique identifier based
+    # on its title.
+    def save(self, *args, **kwargs):
+        """
+        Generate a slug from the event title before saving.
+        """
+        if not self.slug:
+            self.slug = slugify(self.title)
+
+        super().save(*args, **kwargs)
