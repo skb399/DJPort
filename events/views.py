@@ -51,19 +51,23 @@ def event_create(request):
     """
     # Check if the request method is POST, which indicates that the user has submitted the form.
     if request.method == "POST":
-        # Create an instance of the EventForm with the submitted data and files/
+        # Create an instance of the EventForm with the submitted data and files.
         form = EventForm(request.POST, request.FILES)
-
+        # Check if the form is valid (all required fields are filled out correctly).
         if form.is_valid():
             # Save the form but don't commit to the database yet, so we can set the creator field
             event = form.save(commit=False)
+            
             # Set the creator of the event to the currently logged-in user
             event.creator = request.user
+            
             # Save the event to the database after setting the creator field
             event.save()
+            
             # Redirect to the event detail page after successful creation
             return redirect("event_detail", slug=event.slug)
-    # If the request method is not POST, create a new instance of the EventForm 
+        
+    # Else - If the request method is not POST, create a new instance of the EventForm 
     # to display an empty form to the user.
     else:
         form = EventForm()
@@ -73,3 +77,4 @@ def event_create(request):
     }
     # Render the event_form.html template with the context containing the form
     return render(request, "events/event_form.html", context)
+
