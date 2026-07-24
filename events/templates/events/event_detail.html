@@ -33,6 +33,18 @@
                     class="img-fluid mt-3"
                 >
             {% endif %}
+            
+            <!-- If the user is the creator of the event display the edit button, if not the 
+             button is hidden, adding a layer of security so users cannot edit events they 
+             did not create. -->
+            {% if user == event.creator %}
+                <a
+                    href="{% url 'event_edit' event.slug %}"
+                    class="btn btn-primary mt-3"
+                >
+                    Edit Event
+                </a>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -1,7 +1,11 @@
+from django.http import request
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template import context 
 from .models import Event
 from .forms import EventForm
 from django.contrib.auth.decorators import login_required
+
+# Create your views here.
 
 def home(request):
     """
@@ -76,4 +80,56 @@ def event_create(request):
         "form": form,
     }
     # Render the event_form.html template with the context containing the form
+    return render(request, "events/event_form.html", context)
+
+@login_required
+def event_edit(request, slug):
+    """
+    View for editing an existing event.
+    Only the event creator should be able to edit it.
+    """
+    # Asks the database for the event with the given slug. If no event is found,
+    # a 404 error page will be returned.
+    event = get_object_or_404(Event, slug=slug)
+    
+    # This prevents one user from editing another user's event. If the logged-in user 
+    # is not the creator of the event, they are redirected to the event detail page 
+    # instead of being allowed to edit it. This adds a layer of security to ensure 
+    # that only the creator of the event can make changes to it.
+    if event.creator != request.user:
+        return redirect("event_detail", slug=event.slug)
+    
+    # Check if the request method is POST, which shows the user has submitted the form.
+    if request.method == "POST":
+        
+        # Create an instance of the EventForm with the submitted data and files
+        form = EventForm(
+            request.POST,
+            request.FILES,
+            
+            # instance=event tells Django to update the existing Event instance with 
+            # the new data from the form instead of creating a new one.
+            instance=event,
+    )    
+        
+        # Check if the form is valid (all required fields are filled out correctly).
+        if form.is_valid():
+            # I used event = form.save() to save the form because the existing event instance 
+            # ALREADY has a creator, so it does not need to be set again. The form.save() method 
+            # will update the existing event instance with the new data from the form.
+            event = form.save()
+            
+            # Redirect user to the event detail page after successful edit
+            return redirect("event_detail", slug=event.slug)
+    
+    # Else - If the request method is not POST, create an instance of the EventForm with the 
+    # existing event data to display the form pre-filled with the current event details.
+    else:
+        form = EventForm(instance=event)
+        
+    context = {
+        "form": form,
+        "event": event,
+    }
+
     return render(request, "events/event_form.html", context)
