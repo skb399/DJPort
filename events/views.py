@@ -82,6 +82,7 @@ def event_create(request):
     # Render the event_form.html template with the context containing the form
     return render(request, "events/event_form.html", context)
 
+# Decorator "@login_required" to ensure that only logged-in users can access the event_edit view.
 @login_required
 def event_edit(request, slug):
     """
@@ -115,7 +116,7 @@ def event_edit(request, slug):
         # Check if the form is valid (all required fields are filled out correctly).
         if form.is_valid():
             # I used event = form.save() to save the form because the existing event instance 
-            # ALREADY has a creator, so it does not need to be set again. The form.save() method 
+            # already has a creator, so it does not need to be set again. The form.save() method 
             # will update the existing event instance with the new data from the form.
             event = form.save()
             

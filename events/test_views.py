@@ -318,3 +318,288 @@ class EventCreateViewTests(TestCase):
         "title",
         "This field is required."
         )
+        
+class EventEditViewTests(TestCase):
+    """
+    Tests for the event_edit view.
+    """
+    # Arrange: Set up test data for the EventEditView tests
+    def setUp(self):
+        """
+        Create an event owner, another user, an existing event,
+        and store the event-edit URL.
+        """
+        self.owner = User.objects.create_user(
+            username="eventowner",
+            password="testpassword"
+        )
+        # other user created to test that only the event owner can edit the event
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="testpassword"
+        )
+        # Create an event owned by the event owner user to be used in the edit tests
+        self.event = Event.objects.create(
+            creator=self.owner,
+            title="Original Event",
+            slug="original-event",
+            description="The original event description.",
+            venue="Original Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            lineup="Original DJ",
+            status=1
+        )
+        # Store the URL for the event edit page using Django's reverse function.
+        # This allows us to refer to the URL by its name. The slug of the event 
+        # is passed as an argument to generate the correct URL for editing this 
+        # specific event. edit_url will be used to access the event edit view.
+        self.edit_url = reverse(
+            "event_edit",
+            args=[self.event.slug]
+        )
+    
+    def test_event_owner_can_access_edit_page(self):
+        """
+        Test that the event owner can access the event editing page.
+        """
+        # Arrange: Log in as the event owner as set up in the setUp method. 
+        # This user is the creator of the event and should have permission to edit it.
+        self.client.login(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        # Act: Request the event editing page
+        response = self.client.get(self.edit_url)
+
+        # Assert: The page loads and uses the event form template
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "events/event_form.html")
+    
+    def test_edit_form_contains_existing_event(self):
+        """
+        Test that the edit form is populated with the existing event.
+        """
+        # Arrange: Log in as the event owner
+        self.client.login(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        # Act: Request the event editing page
+        response = self.client.get(self.edit_url)
+
+        # Assert: The form is editing the existing event
+        self.assertEqual(
+            # Check that the form's instance is the same as the event being edited.
+            response.context["form"].instance,
+            # This checks that the form is pre-filled with the data of the event 
+            # being edited, ensuring that the user sees the current details of 
+            # the event in the form fields.
+            self.event
+        )
+                
+    def test_event_owner_can_update_event(self):
+        """
+        Test that the event owner can submit valid data
+        and update the existing event.
+        """
+        # Arrange: Log in as the event owner
+        self.client.login(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        # Arrange: Prepare updated form data - the post data must include all required fields, 
+        # and the date must be in the future to be valid.
+        updated_form_data = {
+            "title": "Updated Event",
+            "description": "This event has been updated.",
+            "venue": "Updated Venue",
+            "location": "Liverpool",
+            "date": "2026-08-20T21:00",
+            "genre": "Techno",
+            "lineup": "Updated DJ",
+        }
+
+        # Act: Submit the updated data
+        response = self.client.post(
+            self.edit_url,
+            data=updated_form_data
+        )
+
+        # Assert: Editing did not create a second event
+        self.assertEqual(Event.objects.count(), 1)
+
+        # Reload the event with its latest database values. The slug may change when the title changes,
+        # so we need to refresh the event instance to get the updated slug and other fields from the database.
+        # refresh_from_db() is a method provided by Django's model instances that reloads the instance's data from the database,
+        # so that any changes made to the instance in the database are reflected in the instance in memory. This is important
+        # after an update operation, as Django still has the old values stored in self.event until we refresh from the database.
+        self.event.refresh_from_db()
+
+        # Assert: The original event now contains the updated data
+        self.assertEqual(self.event.title, "Updated Event")
+        self.assertEqual(
+            self.event.description,
+            "This event has been updated."
+        )
+        self.assertEqual(self.event.venue, "Updated Venue")
+        self.assertEqual(self.event.location, "Liverpool")
+        self.assertEqual(self.event.genre, "Techno")
+        self.assertEqual(self.event.lineup, "Updated DJ")
+
+        # Assert: The user is redirected to the event detail page
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+        
+    def test_event_owner_can_update_event(self):
+        """
+        Test that the event owner can update an existing event.
+        """
+        # Arrange: Log in as the owner
+        self.client.login(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        # Arrange: Prepare valid updated form data, including #
+        # all required fields and a future date for the event.
+        updated_form_data = {
+            "title": "Updated Event",
+            "description": "This event has been updated.",
+            "venue": "Updated Venue",
+            "location": "Liverpool",
+            "date": "2026-08-20T21:00",
+            "genre": "Techno",
+            "lineup": "Updated DJ",
+        }
+
+        # Act: Submit the updated data to the edit view
+        response = self.client.post(
+            self.edit_url,
+            data=updated_form_data
+        )
+
+        # Assert: Check that editing did not create a second event
+        self.assertEqual(Event.objects.count(), 1)
+
+        # Reload the event from the database to ensure we have the 
+        # latest data after the update.
+        self.event.refresh_from_db()
+
+        # Assert: Check that the existing event was updated with the new data from the form submission
+        self.assertEqual(self.event.title, "Updated Event")
+        # check that the description was updated correctly and message is displayed on the event detail page
+        self.assertEqual(
+            self.event.description,
+            "This event has been updated."
+        )
+        
+        #check that the venue, location, genre, and lineup were updated correctly
+        self.assertEqual(self.event.venue, "Updated Venue")
+        self.assertEqual(self.event.location, "Liverpool")
+        self.assertEqual(self.event.genre, "Techno")
+        self.assertEqual(self.event.lineup, "Updated DJ")
+
+        # Assert: The owner is redirected to the event detail page
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+    
+    def test_non_owner_cannot_access_edit_page(self):
+        """
+        Test that a logged-in user cannot edit another user's event.
+        """
+        # Arrange: Other user created to test that only the event owner can edit the event
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Request the edit page for an event they do not own
+        response = self.client.get(self.edit_url)
+
+        # Assert: The user is redirected away from the edit page
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+        
+    def test_logged_out_user_is_redirected_from_edit_page(self):
+        """
+        Test that a logged-out user cannot access the event editing page.
+        """
+        # Act: Request the edit page without logging in, the user should be redirected to the login page
+        response = self.client.get(self.edit_url)
+
+        # Assert: The user is redirected to the login page, with a 302 status code and the correct redirect URL
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            # Use reverse to get the URL for the login page, and append the next parameter to redirect back to 
+            # the edit page after login
+            f"{reverse('account_login')}?next={self.edit_url}"
+        )
+        
+    def test_invalid_form_does_not_update_event(self):
+        """
+        Test that invalid form data does not update the existing event.
+        """
+        # Arrange: Log in as the event owner
+        self.client.login(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        invalid_form_data = {
+            "title": "",
+            "description": "This should not be saved as it's invalid.",
+            "venue": "Invalid Venue",
+            "location": "Liverpool",
+            "date": "2026-08-20T21:00",
+            "genre": "Techno",
+            "lineup": "Invalid DJ",
+        }
+
+        # Act: Submit invalid data - the title is required, so leaving it blank 
+        # should trigger a validation error
+        response = self.client.post(
+            self.edit_url,
+            data=invalid_form_data
+        )
+
+        # Reload the event from the database
+        self.event.refresh_from_db()
+
+        # Assert: The original event was not changed
+        self.assertEqual(self.event.title, "Original Event")
+        self.assertEqual(self.event.venue, "Original Venue")
+
+        # Assert: The form is redisplayed with an error
+        self.assertEqual(response.status_code, 200)
+        
+        # Assert: The correct template is used for the event edit form
+        self.assertTemplateUsed(response, "events/event_form.html")
+        
+        # Assert: Check that the form contains an error for the title field,
+        # showing that it is required
+        self.assertFormError(
+            response.context["form"],
+            "title",
+            "This field is required."
+        )
