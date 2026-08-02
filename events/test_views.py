@@ -470,7 +470,7 @@ class EventEditViewTests(TestCase):
             password="testpassword"
         )
 
-        # Arrange: Prepare valid updated form data, including #
+        # Arrange: Prepare valid updated form data, including
         # all required fields and a future date for the event.
         updated_form_data = {
             "title": "Updated Event",
@@ -602,4 +602,200 @@ class EventEditViewTests(TestCase):
             response.context["form"],
             "title",
             "This field is required."
+        )
+        
+
+class EventDeleteViewTests(TestCase):
+    """
+    Tests for the event_delete view.
+    """
+    def setUp(self):
+        """
+        Create an event owner, another user, an event,
+        and store the delete URL.
+        """
+        self.owner = User.objects.create_user(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        # Create another user to test that only the event owner can delete the event
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Create an event owned by the event owner user to be used in the delete tests  
+        self.event = Event.objects.create(
+            creator=self.owner,
+            title="Event To Delete",
+            slug="event-to-delete",
+            description="An event used for deletion tests.",
+            venue="Test Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            lineup="Test DJ",
+            status=1
+        )
+
+        # Store the URL for the event delete page using Django's reverse function.
+        # This allows us to refer to the URL by its name instead of hardcoding it.
+        self.delete_url = reverse(
+            "event_delete",
+            args=[self.event.slug]
+        )
+    
+    def test_event_owner_can_access_delete_confirmation_page(self):
+        """
+        Test that the event owner can access the deletion confirmation page, and that 
+        opening the confirmation page does not delete the event. The event should only
+        be deleted after the user confirms by submitting the form.
+        """
+        # Arrange: Log in as the event owner
+        self.client.login(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        # Act: Request the delete confirmation page
+        response = self.client.get(self.delete_url)
+
+        # Assert: The confirmation page loads correctly, or the user is redirected 
+        # to the event detail page if they are not the owner
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/event_confirm_delete.html"
+        )
+
+        # Assert: A GET request did not delete the event as there is still one event in the database,
+        # proving that the event is only deleted after a POST request.
+        self.assertEqual(Event.objects.count(), 1)
+    
+    def test_event_owner_can_delete_event(self):
+        """
+        Test that the event owner can confirm deletion and remove the event, and that event is actually 
+        deleted from the database after the confirmation form is submitted. The event should only be deleted 
+        after the user confirms by submitting the form.
+        """
+        # Arrange: Log in as the event owner
+        self.client.login(
+            username="eventowner",
+            password="testpassword"
+        )
+
+        # Act: Submit the deletion confirmation form, which should delete the event and redirect 
+        # to the event list page
+        response = self.client.post(
+            self.delete_url,
+            # follow=True tells Django's test client to follow the redirect to the event list, so we
+            # can check that the event is no longer displayed on the event list page after deletion.
+            follow=True
+        )
+
+        # Assert: The event was removed from the database, making the event count zero, proving 
+        # that the event is only deleted after a POST request.
+        self.assertEqual(Event.objects.count(), 0)
+
+        # Assert: The user was redirected to the event list page after confirming the deletion.
+        self.assertRedirects(
+            response,
+            reverse("event_list")
+        )
+
+        # Assert: The deleted event is no longer displayed on the event list page, proving that 
+        # the event was successfully deleted and is no longer accessible.
+        self.assertNotContains(response, "Event To Delete")
+        
+    def test_non_owner_cannot_delete_event(self):
+        """
+        Test that a logged-in user cannot delete another user's event.
+        """
+        # Arrange: Log in as a different user, to check that only the event owner can delete the event. 
+        # The other user should not have permission to delete this event.
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Other usert tries to submit the deletion confirmation form for an event they do not own.
+        response = self.client.post(self.delete_url)
+
+        # Assert: The other user is redirected to the event detail page, and the event is not deleted.
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+
+        # Assert: The event still exists as the count of events in the database is still 1, proving 
+        # that the event was not deleted by a non-owner.
+        self.assertEqual(Event.objects.count(), 1)
+        # Assert: The event still exists in the database, proving that the event was not deleted by a non-owner.
+        self.assertTrue(
+            # Check that the specific event created in setUp still exists in the database by looking
+            # it up using its unique primary key (pk). Rather than only checking the total number of events.
+            Event.objects.filter(pk=self.event.pk).exists()
+        )
+        
+    def test_logged_out_user_is_redirected_from_delete_page(self):
+        """
+        Test that a logged-out user cannot access the event deletion page, even if they type in the delete URL directly. 
+        The user should be redirected to the login page, and the event should not be deleted.
+        """
+        # Act: Request the delete page without logging in
+        response = self.client.get(self.delete_url)
+
+        # Assert: The user is redirected to the login page with a 302 status code and the correct redirect URL, 
+        # and the event is not deleted.
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            # Use reverse to get the URL for the login page, and append the next parameter to redirect back to 
+            # the delete page after login. This ensures that the user is asked to log in before they can 
+            # access the delete confirmation page.
+            f"{reverse('account_login')}?next={self.delete_url}"
+        )
+
+        # Assert: The event was not deleted, showing that logged out user cannot cannot delete the event, as it
+        # still exists in the database as we look it up using its unique primary key (pk). This proves that the
+        # event is only deleted after a POST request by the owner.
+        self.assertTrue(
+            Event.objects.filter(pk=self.event.pk).exists()
+        )
+        
+    def test_non_owner_cannot_access_delete_confirmation_page(self):
+        """
+        Test that a logged-in non-owner cannot access another user's
+        event deletion confirmation page even if they type in the delete URL directly. 
+        The user should be redirected to the event detail page, and the event should not be deleted.
+        """
+        # Arrange: Log in as a different user
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Attempt to open the delete confirmation page for an event they do not own. 
+        # The other user should not have permission to access this page.
+        response = self.client.get(self.delete_url)
+
+        # Assert: The user is redirected to the event detail page 
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+
+        # Assert: The specific event still exists in the database as the count of events in 
+        # the database is still 1, and the we can see it's still there by looking up the primary 
+        # key, proving that the event was not deleted by a non-owner.
+        self.assertEqual(Event.objects.count(), 1)
+        self.assertTrue(
+            Event.objects.filter(pk=self.event.pk).exists()
         )
