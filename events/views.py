@@ -5,6 +5,10 @@ from .models import Event
 from .forms import EventForm
 from django.contrib.auth.decorators import login_required
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 
 def home(request):
