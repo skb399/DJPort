@@ -25,7 +25,7 @@ urlpatterns = [
          name="event_list"),
    
     # Add a URL pattern for the event creation view, which is only accessible to logged-in users. 
-    # The @login_required decorator in the view ensures that only authenticated users can access 
+    # The @login_required decorator in the views ensure that only authenticated users can access 
     # this view.
     path("events/create/", 
          
@@ -51,6 +51,21 @@ urlpatterns = [
     # which can be useful for reverse URL matching in templates and views.
     name="event_edit",
     ),
+    
+    # Adds a URL pattern for the event delete view, which allows logged-in users to delete an existing event.
+    # URL ordering is important in Django, as the first matching pattern will be used, so this needs to go before
+    # the event detail view to avoid conflicts. If the event detail view was placed before this,
+    # it would match any URL with a slug and prevent access to the event delete view.
+    path(
+    "events/<slug:slug>/delete/",
+    
+    # The views.event_delete function is called when this URL pattern is matched.
+    # The <slug:slug> part of the URL captures the slug of the event to be deleted and passes it as an argument to the view function.
+    views.event_delete,
+     # The name parameter is used to uniquely identify this URL pattern,
+     # which can be useful for reverse URL matching in templates and views.
+    name="event_delete",
+     ),
     
     # Add a URL pattern for the event detail view. For <slug:slug> - Slug is used to uniquely 
     # identify each event in the URL. The first slug is the data type, and the second slug 

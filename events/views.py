@@ -53,7 +53,7 @@ def event_create(request):
     """
     View for creating a new event. Only accessible to logged-in users.
     """
-    # Check if the request method is POST, which indicates that the user has submitted the form.
+    # Check if the request method is POST, which shows that the user has submitted the form.
     if request.method == "POST":
         # Create an instance of the EventForm with the submitted data and files.
         form = EventForm(request.POST, request.FILES)
@@ -134,3 +134,34 @@ def event_edit(request, slug):
     }
 
     return render(request, "events/event_form.html", context)
+
+# Decorator "@login_required" to ensure that only logged-in users can access the event_delete view.
+@login_required
+def event_delete(request, slug):
+    """
+    Allow an event creator to delete their own event.
+    """
+    # Retrieve the requested event or return a 404 page if it does not exist.
+    event = get_object_or_404(Event, slug=slug)
+
+    # Prevent logged-in users from deleting events created by someone else. This has been recycled 
+    # from the event_edit view to ensure that only the creator of the event can delete it.
+    if event.creator != request.user:
+        return redirect("event_detail", slug=event.slug)
+
+    # Only delete the event after the confirmation form is submitted. This has also been recycled 
+    # from the event_edit view to ensure that the event is only deleted after the user confirms.
+    if request.method == "POST":
+        event.delete()
+
+        # The deleted event no longer has a usable detail page,
+        # so redirect the user to the event list.
+        return redirect("event_list")
+
+    context = {
+        "event": event,
+    }
+
+    # A GET request displays the confirmation page.
+    return render(request, "events/event_confirm_delete.html", context)
+
