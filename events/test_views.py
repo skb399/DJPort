@@ -38,15 +38,23 @@ class EventListViewTests(TestCase):
             genre="Techno",
             status=0
         )
-    # Act: Test that the event list view returns a 200 status code and uses the correct template   
+    
     def test_event_list_page_loads(self):
+        """
+        Test that the event list view returns a 200 status code and uses the correct template
+        This test checks that the event list page loads successfully and uses the correct template.
+        """    
         # Act: Make a GET request to the event list view
         response = self.client.get(reverse("event_list"))
         # Assert: Check that the response status code is 200 (OK)
         self.assertEqual(response.status_code, 200)
 
-    # Act: Test that the event list view only displays published events
+    
     def test_event_list_uses_correct_template(self):
+        """
+        Test that the event list view only displays published events
+        and uses the correct template.
+        """
         # Act: Make a GET request to the event list view
         response = self.client.get(reverse("event_list"))
         # Assert: Check that the correct template is used for the event list view
@@ -55,16 +63,22 @@ class EventListViewTests(TestCase):
             "events/event_list.html"
         )
     
-    # Act: Test that the event list view only shows published events and not draft events    
+    
     def test_event_list_only_shows_published_events(self):
+        """
+        Test that the event list view only shows published events and not draft events
+        """
         # Act: Make a GET request to the event list view
         response = self.client.get(reverse("event_list"))
         # Assert: Check that the published event is in the context and the draft event is not
         self.assertContains(response, "Published Event")
         self.assertNotContains(response, "Draft Event")
         
-     # Act: Test that the event list view shows a message when there are no published events   
+     
     def test_event_list_shows_message_when_there_are_no_published_events(self):
+        """
+        Test that the event list view shows a message when there are no published events.
+        """
         # Delete the published event to simulate no published events
         self.published_event.delete()
         # Act: Make a GET request to the event list view
@@ -109,8 +123,7 @@ class EventDetailViewTests(TestCase):
             genre="Drum & Bass",
             status=1,
         )
-    # Act: Test that the event detail page returns a 200 response and 
-    # uses the correct template for a valid event    
+  
     def test_event_detail_page_loads_successfully_for_valid_event(self):
         """
         Test that the event detail page returns a 200 response
@@ -125,7 +138,6 @@ class EventDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "events/event_detail.html")
     
-    # Act: test that the correct event information appears on the detail page    
     def test_event_detail_displays_correct_event_information(self):
         """
         Test that the event detail page displays the correct event information.
@@ -141,11 +153,10 @@ class EventDetailViewTests(TestCase):
         self.assertContains(response, self.published_event.description)
         self.assertContains(response, self.published_event.genre)
     
-    # Act: Test that the event detail view returns a 404 response for an invalid slug
+    
     def test_event_detail_returns_404_for_invalid_slug(self):
         """
-        Test that the event detail view returns a 404 response
-        for an invalid slug.
+        Test that the event detail view returns a 404 response for an invalid slug
         """
         # Act: Make a GET request to the event detail view with a slug that does not exist
         response = self.client.get(
@@ -155,10 +166,9 @@ class EventDetailViewTests(TestCase):
         # Assert: Check that the response status code is 404 (Not Found)
         self.assertEqual(response.status_code, 404)
     
-    # Act: Test that the event detail page only displays the requested event and not other incorrect events
     def test_event_detail_does_not_display_another_event(self):
         """
-        Test that the event detail page only displays the requested event.
+        Test that the event detail page only displays the requested event and not other incorrect events
         """
         # Act: Make a GET request to the event detail view for the published event
         response = self.client.get(
@@ -462,7 +472,7 @@ class EventEditViewTests(TestCase):
         
     def test_event_owner_can_update_event(self):
         """
-        Test that the event owner can update an existing event.
+        Test that the event owner can update an existing event. 
         """
         # Arrange: Log in as the owner
         self.client.login(

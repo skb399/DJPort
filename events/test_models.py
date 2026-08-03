@@ -46,7 +46,7 @@ class TestEventModel(TestCase):
             status=1
         )
 
-    # Act: Test that the Event model's __str__ method returns the event title
+    # Test that the Event model's __str__ method returns the event title
     def test_event_string_method_returns_title(self):
         """
         Test that the Event model's __str__ method
@@ -59,31 +59,31 @@ class TestEventModel(TestCase):
             msg="Event string method does not return the title"
         )
 
-    # Act: Test that the default status of a newly created event is Published (1)
+    # Test that a newly created event defaults to Published (1).
     def test_default_status_is_published(self):
         """
         Test that a created event that's just been created defaults
-        to Published status when no status is supplied.
+        to Published status.
         """
         # Create a new event without specifying the status
-        draft_event = Event.objects.create(
+        published_event = Event.objects.create(
             creator=self.user,
-            title="Draft Event",
-            slug="draft-event",
-            description="Draft description",
-            venue="Draft Venue",
+            title="Published Event",
+            slug="published-event",
+            description="Published description",
+            venue="Published Venue",
             location="Bristol",
             date=timezone.now() + timedelta(days=14),
             genre="Techno"
         )
         # Assert: Check that the default status of the new event is Published (1)
         self.assertEqual(
-            draft_event.status,
+            published_event.status,
             1,
-            msg="Event status does not default to Published"
+            msg="Event status should default to Published"
         )
 
-    # Act: Test that the creator ForeignKey correctly links the event to the user who created it
+    # Test that the creator ForeignKey correctly links the event to the user who created it
     def test_creator_relationship(self):
         """
         Test that the creator ForeignKey correctly
@@ -96,7 +96,7 @@ class TestEventModel(TestCase):
             msg="Event is not linked to the correct creator"
         )
 
-    # Act: Test that the lineup field can be left blank
+    # Test that the lineup field can be left blank
     def test_lineup_can_be_blank(self):
         """
         Test that the lineup field has optional entry for the user.
