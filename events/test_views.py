@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Event
+from .models import Event, Comment
 
 class EventListViewTests(TestCase):
     # Arrange: Set up test data for the EventListView tests
@@ -798,4 +798,190 @@ class EventDeleteViewTests(TestCase):
         self.assertEqual(Event.objects.count(), 1)
         self.assertTrue(
             Event.objects.filter(pk=self.event.pk).exists()
+        )
+        
+class CommentViewTests(TestCase):
+    """
+    Tests for displaying and submitting comments on events.
+    """
+
+    def setUp(self):
+        """
+        Create a user, an event, approved and unapproved comments,
+        and store the relevant URLs.
+        """
+        self.user = User.objects.create_user(
+            username="commentuser",
+            password="testpassword"
+        )
+
+        self.event = Event.objects.create(
+            creator=self.user,
+            title="Comment Test Event",
+            slug="comment-test-event",
+            description="An event used for comment tests.",
+            venue="Test Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            lineup="Test DJ",
+            status=1
+        )
+
+        self.approved_comment = Comment.objects.create(
+            event=self.event,
+            author=self.user,
+            body="This comment is approved.",
+            approved=True
+        )
+
+        self.unapproved_comment = Comment.objects.create(
+            event=self.event,
+            author=self.user,
+            body="This comment is awaiting approval.",
+            approved=False
+        )
+
+        self.detail_url = reverse(
+            "event_detail",
+            args=[self.event.slug]
+        )
+
+        self.add_comment_url = reverse(
+            "add_comment",
+            args=[self.event.slug]
+        )
+    
+    def test_approved_comment_is_displayed(self):
+        """
+        Test that approved comments are displayed on the event detail page.
+        """
+        # Act - Make a GET request to the event detail view for the event with an approved comment
+        response = self.client.get(self.detail_url)
+
+        # Assert: Check that the response status code is 200 (OK)
+        self.assertEqual(response.status_code, 200)
+        
+        # Assert: Check that the response contains the approved comment's body, proving that approved comments are 
+        # displayed on the event detail page.
+        self.assertContains(
+            response,
+            "This comment is approved."
+        )
+        
+    def test_unapproved_comment_is_not_displayed(self):
+        """
+        Test that unapproved comments are hidden from the event detail page.
+        """
+        # Act - Make a GET request to the event detail view for the event with an unapproved comment
+        response = self.client.get(self.detail_url)
+
+        # Assert: Check that the response status code is 200 (OK)
+        self.assertEqual(response.status_code, 200)
+        
+        # Assert: Check that the response does not contain the unapproved comment's body, 
+        # proving that unapproved comments are not displayed on the event detail page.
+        self.assertNotContains(
+            response,
+            "This comment is awaiting approval."
+        )
+        
+    def test_logged_in_user_can_submit_comment(self):
+        """
+        Test that a logged-in user can submit a comment on an event.
+        """
+        # Arrange: Log in as the comment author 
+        self.client.login(
+            username="commentuser",
+            password="testpassword"
+        )
+
+        # Act: Submit a valid comment to the add_comment view for the event
+        response = self.client.post(
+            self.add_comment_url,
+            data={
+                "body": "This is a new test comment."
+            }
+        )
+
+        # Assert: A new comment was added to the database, comment count is 3 
+        # because we had 2 comments in setUp (1 approved, 1 unapproved) and now 
+        # we added a new one.
+        self.assertEqual(Comment.objects.count(), 3)
+
+        # Retrieve the newly created comment
+        new_comment = Comment.objects.get(
+            body="This is a new test comment."
+        )
+
+        # Assert: The comment is linked to the correct user and event
+        self.assertEqual(new_comment.author, self.user)
+        self.assertEqual(new_comment.event, self.event)
+
+        # Assert: New comments require approval by default
+        self.assertFalse(new_comment.approved)
+
+        # Assert: The user is redirected back to the event detail page
+        self.assertRedirects(
+            response,
+            self.detail_url
+        )
+        
+    def test_logged_out_user_cannot_submit_comment(self):
+        """
+        Test that a logged-out user cannot submit a comment.
+        """
+        # Act: Try to submit a comment without logging in
+        response = self.client.post(
+            self.add_comment_url,
+            data={
+                "body": "This comment should not be saved."
+            }
+        )
+
+        # Assert: The user should be redirected to the login page
+        self.assertRedirects(
+            response,
+            f"{reverse('account_login')}?next={self.add_comment_url}"
+        )
+
+        # Assert: No new comment was created as the user is not logged in, 
+        # so the comment count remains 2 (1 approved, 1 unapproved)
+        self.assertEqual(Comment.objects.count(), 2)
+
+        # Assert: The comment with the body "This comment should not be saved." 
+        # does not exist in the database,
+        self.assertFalse(
+            Comment.objects.filter(
+                body="This comment should not be saved."
+            ).exists()
+        )
+        
+    def test_empty_comment_is_not_saved(self):
+        """
+        Test that an empty comment cannot be submitted.
+        """
+        # Arrange: Log in as the comment author
+        self.client.login(
+            username="commentuser",
+            password="testpassword"
+        )
+
+        # Act: Submit an empty comment body, 
+        # which should not be saved to the database
+        response = self.client.post(
+            self.add_comment_url,
+            data={
+                "body": ""
+            }
+        )
+
+        # Assert: No new comment was created, so the comment count 
+        # remains 2 (1 approved, 1 unapproved)
+        self.assertEqual(Comment.objects.count(), 2)
+
+        # Assert: The user is redirected back to the event detail page
+        self.assertRedirects(
+            response,
+            self.detail_url
         )

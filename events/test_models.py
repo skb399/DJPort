@@ -59,11 +59,11 @@ class TestEventModel(TestCase):
             msg="Event string method does not return the title"
         )
 
-    # Act: Test that the default status of a newly created event is Draft (0)
-    def test_default_status_is_draft(self):
+    # Act: Test that the default status of a newly created event is Published (1)
+    def test_default_status_is_published(self):
         """
-        Test that a created event thats just been created defaults
-        to Draft status when no status is supplied.
+        Test that a created event that's just been created defaults
+        to Published status when no status is supplied.
         """
         # Create a new event without specifying the status
         draft_event = Event.objects.create(
@@ -76,11 +76,11 @@ class TestEventModel(TestCase):
             date=timezone.now() + timedelta(days=14),
             genre="Techno"
         )
-        # Assert: Check that the default status of the new event is Draft (0)
+        # Assert: Check that the default status of the new event is Published (1)
         self.assertEqual(
             draft_event.status,
-            0,
-            msg="Event status does not default to Draft"
+            1,
+            msg="Event status does not default to Published"
         )
 
     # Act: Test that the creator ForeignKey correctly links the event to the user who created it
