@@ -41,7 +41,7 @@ event was created and last updated.
     # status field to indicate whether the event is a draft or published
     status = models.IntegerField(
         choices=STATUS,
-        default=0
+        default=1
     )
     venue = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
@@ -73,3 +73,61 @@ event was created and last updated.
             self.slug = slugify(self.title)
 
         super().save(*args, **kwargs)
+        
+
+class Comment(models.Model):
+    """
+    Stores a comment made by a user on an event.
+
+    Each comment is linked to one event and one registered user.
+    Comments require approval before they are displayed publicly.
+    """
+    # The event field is a foreign key to the Event model, setting a many-to-one relationship
+    # where multiple comments can be associated with a single event. The on_delete=models.CASCADE 
+    # argument ensures that if an event is deleted, all associated comments are also deleted.
+    # related_name="comments" allows you to access all comments for an event through event.comments.all()
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="comments"
+    )
+
+    # The author field is a foreign key to the User model, establishing a many-to-one relationship
+    # where multiple comments can be made by a single user. The on_delete=models.CASCADE argument
+    # ensures that if a user is deleted, all their comments are also deleted. 
+    # The related_name="event_comments" lets you access all comments by a user through user.event_comments.all().
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="event_comments"
+    )
+
+    # The body field stores the content of the comment. A TextField is used
+    # because it allows users to write comments of varying length without
+    # requiring a fixed maximum number of characters.
+    body = models.TextField()
+
+    # The created_on field automatically records the date and time when the comment is created. 
+    # auto_now_add=True means that the field is set to the current date and time when the comment
+    # is first created, and it cannot be changed afterward.
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    # The approved field is a BooleanField that indicates whether the comment has been approved for
+    # display. By default, it is set to False, meaning that comments require approval before they 
+    # are visible to the public. This allows event organizers or moderators to review comments 
+    # before they are displayed.
+    approved = models.BooleanField(
+        default=False
+    )
+
+    # The Meta class sets the default ordering of comments to be in ascending order based on the 
+    # created_on field, so that newest comments appear first.
+    class Meta:
+        ordering = ["-created_on"]
+
+    # The __str__ method provides a human-readable representation of the Comment instance,
+    # which includes the author's username and the title of the event the comment is for.
+    def __str__(self):
+        return f"Comment by {self.author} on {self.event}"

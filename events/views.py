@@ -1,13 +1,7 @@
-from django.http import request
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template import context 
 from .models import Event
-from .forms import EventForm
+from .forms import EventForm, CommentForm
 from django.contrib.auth.decorators import login_required
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -41,15 +35,52 @@ def event_detail(request, slug):
     # Use get_object_or_404 to retrieve the event with the given slug.
     # If no event is found, a 404 error page will be returned.    
     event = get_object_or_404(Event, slug=slug)
+    
+    # Retrieve only approved comments linked to this event.
+    comments = event.comments.filter(approved=True)
+    
+    comment_form = CommentForm()
 
     # Create a context dictionary to pass the event to the template. 
     # This is for a single event, so the key is singular "event" 
     # instead of plural "events" that was used in the event_list view.
     context = {
         "event": event,
+        "comments": comments,
+        "comment_form": comment_form,
     }
 
     return render(request, "events/event_detail.html", context)
+
+@login_required
+def add_comment(request, slug):
+    """
+    Allow a logged-in user to submit a comment on an event. 
+    """
+    # Use get_object_or_404 to retrieve the event with the given slug.
+    # If no event is found, a 404 error page will be returned.
+    event = get_object_or_404(Event, slug=slug)
+
+    # Check if the request method is POST, which indicates that the user has submitted the comment form.
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST)
+        # Check if the form is valid (all required fields are filled out correctly).
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+
+            # Link the comment to the selected event. Prevents the user from choosing which event to comment on, 
+            # as the comment is automatically linked to the event detail page they are on.
+            comment.event = event
+
+            # Link the comment to the currently logged-in user. Prevents the user from choosing which user to 
+            # comment as, as the comment is automatically linked to the logged-in user.
+            comment.author = request.user
+
+            # Save the comment with approved=False by default.
+            comment.save()
+    
+    # Redirect the user back to the event detail page after submitting the comment.
+    return redirect("event_detail", slug=event.slug)
 
 # Decorator "@login_required" to ensure that only logged-in users can access the event_create view.
 @login_required

@@ -33,6 +33,44 @@
                     class="img-fluid mt-3"
                 >
             {% endif %}
+
+            <!-- Comment Section-->
+            <section class="mt-5">
+                <h2>Comments</h2>
+                <!-- If the user is authenticated, display the comment form -->
+                {% if user.is_authenticated %}
+                    <form method="POST" action="{% url 'add_comment' event.slug %}">
+                    <!-- Include the CSRF token for security -->
+                        {% csrf_token %}
+                    <!-- Render the comment form fields as paragraphs -->
+                    {{ comment_form.as_p }}
+                    <button type="submit" class="btn btn-primary">
+                        Submit
+                    </button>
+                </form>
+                {% else %}
+                    <!-- Else, if the user is not authenticated, prompt them to log in to comment -->
+                    <p>
+                        <a href="{% url 'account_login' %}">Log in</a> to add a comment.
+                    </p>
+                {% endif %}
+                
+                <!-- Display all approved comments for this event -->
+                {% for comment in comments %}
+                    <div class="mb-3">
+                        <p>
+                            <strong>{{ comment.author }}</strong>
+                            <small>{{ comment.created_on|date:"D d M Y, H:i" }}</small>
+                        </p>
+
+                        <p>{{ comment.body }}</p>
+                    </div>
+                
+                <!-- If there are no comments, display a message -->
+                {% empty %}
+                    <p>No comments yet.</p>
+                {% endfor %}
+            </section>
             
             <!-- If the user is the creator of the event display the edit button, if not the 
              button is hidden, adding a layer of security so users cannot edit events they 

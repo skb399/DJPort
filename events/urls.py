@@ -67,6 +67,18 @@ urlpatterns = [
     name="event_delete",
      ),
     
+    # Add a URL pattern for the add comment view, which allows logged-in users to add comments to an event. 
+    path(
+     "events/<slug:slug>/comment/",
+     
+     # The views.add_comment function is called when this URL pattern is matched.
+     views.add_comment,
+     
+     # The name parameter is used to uniquely identify this URL pattern,
+     # which can be useful for reverse URL matching in templates and views.
+     name="add_comment",
+     ),
+    
     # Add a URL pattern for the event detail view. For <slug:slug> - Slug is used to uniquely 
     # identify each event in the URL. The first slug is the data type, and the second slug 
     # is the variable name that will be passed to the view function.
