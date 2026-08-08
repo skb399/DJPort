@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .models import Event
 from .forms import EventForm, CommentForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 # Create your views here.
 
@@ -40,6 +41,16 @@ def event_detail(request, slug):
     comments = event.comments.filter(approved=True)
     
     comment_form = CommentForm()
+    
+    # The is_favourited variable is calculated in the view because the view is responsible 
+    # for preparing data for the template. This keeps the template focused on displaying 
+    # the data rather than performing database queries. The template can then simply check 
+    # whether is_favourited is True or False to display the correct favourite button.
+    if request.user.is_authenticated:
+        is_favourited = event.favourited_by.filter(id=request.user.id).exists()
+    
+    else:
+        is_favourited = False
 
     # Create a context dictionary to pass the event to the template. 
     # This is for a single event, so the key is singular "event" 
@@ -48,6 +59,7 @@ def event_detail(request, slug):
         "event": event,
         "comments": comments,
         "comment_form": comment_form,
+        "is_favourited": is_favourited,
     }
 
     return render(request, "events/event_detail.html", context)
@@ -80,6 +92,30 @@ def add_comment(request, slug):
             comment.save()
     
     # Redirect the user back to the event detail page after submitting the comment.
+    return redirect("event_detail", slug=event.slug)
+
+# Decorator "@login_required" to ensure that only logged-in users can access the toggle_favourite view.
+@login_required
+def toggle_favourite(request, slug):
+    """
+    Add or remove an event from the logged-in user's favourites. 
+    """
+    event = get_object_or_404(Event, slug=slug)
+
+    # Check if the request method is POST, confirming that the user has clicked the favourite/unfavourite button.
+    if request.method == "POST":
+        
+        # Check if the logged-in user has already favourited the event.
+        if event.favourited_by.filter(id=request.user.id).exists():
+            event.favourited_by.remove(request.user)
+            messages.success(request, "Event removed from your favourites.")
+        
+        # If the user has not favourited the event, add them to the favourited_by list.
+        else:
+            event.favourited_by.add(request.user)
+            messages.success(request, "Event added to your favourites.")
+   
+    # Redirect the user back to the event detail page after toggling the favourite status.
     return redirect("event_detail", slug=event.slug)
 
 # Decorator "@login_required" to ensure that only logged-in users can access the event_create view.

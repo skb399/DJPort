@@ -79,6 +79,18 @@ urlpatterns = [
      name="add_comment",
      ),
     
+    path(
+    # Add a URL pattern for the toggle favourite view, which allows logged-in users to add or remove an event from their favourites.     
+    "events/<slug:slug>/favourite/",
+    
+    # The views.toggle_favourite function is called when this URL pattern is matched.
+    views.toggle_favourite,
+    
+    # The name parameter is used to uniquely identify this URL pattern,
+    # which can be useful for reverse URL matching in templates and views.
+    name="toggle_favourite",
+     ),
+    
     # Add a URL pattern for the event detail view. For <slug:slug> - Slug is used to uniquely 
     # identify each event in the URL. The first slug is the data type, and the second slug 
     # is the variable name that will be passed to the view function.

@@ -90,6 +90,28 @@
                     Delete Event
                 </a>
             {% endif %}
+            <!-- Only logged-in users can add or remove an event from their favourites -->
+            {% if user.is_authenticated %}
+                <form
+                    method="POST"
+                    action="{% url 'toggle_favourite' event.slug %}"
+                    class="d-inline"
+                >
+                    {% csrf_token %}
+
+                    {% if is_favourited %}
+                        <button type="submit" class="btn btn-outline-danger mt-3">
+                            <i class="fas fa-heart"></i>
+                            Remove from Favourites
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-secondary mt-3">
+                            <i class="fa``r fa-heart"></i>
+                            Add to Favourites
+                        </button>
+                    {% endif %}
+                </form>
+            {% endif %}
         </div>
     </div>
 </div>
