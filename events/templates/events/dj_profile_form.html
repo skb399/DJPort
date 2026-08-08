@@ -6,19 +6,24 @@
 <div class="container py-5">
     <div class="row">
         <div class="col-md-8 offset-md-2">
-            <h1>Create Event</h1>
-            <!-- enctype="multipart/form-data" is required for file uploads (images) -->
+
+            <h1>Create DJ Profile</h1>
+
+            <!-- enctype="multipart/form-data" is required for image uploads -->
             <form method="POST" enctype="multipart/form-data">
-                <!-- CSRF token for security to prevent cross-site request forgery attacks -->
+
+                <!-- CSRF token for security -->
                 {% csrf_token %}
-                <!-- Render all form fields automatically, with each field wrapped in a 
-                 <p> tag USING Django's form.as_p method -->
+
+                <!-- Render the DJ profile form using Django Crispy Forms -->
                 {{ form|crispy }}
 
                 <button type="submit" class="btn btn-primary">
-                    Create Event
+                    Create DJ Profile
                 </button>
+
             </form>
+
         </div>
     </div>
 </div>

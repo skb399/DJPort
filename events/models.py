@@ -73,8 +73,94 @@ event was created and last updated.
             self.slug = slugify(self.title)
 
         super().save(*args, **kwargs)
-        
 
+class DJProfile(models.Model):
+    """
+    DJ Profile Model for the DJ Port application. This stores a DJ profile linked to one registered user.
+    Each user can only create one DJ profile, and the profile includes fields for the DJ's name, bio, 
+    genres, location, image, website, and social media links. The model also includes timestamps for when 
+    the profile was created and last updated.
+    """
+
+    # The owner field is a one-to-one relationship with the User model, ensuring that each user can only 
+    # have one DJ profile. owner is used because it represents the user who owns the DJ profile. 
+    # The on_delete=models.CASCADE argument ensures that if a user is deleted, their associated 
+    # DJ profile will also be deleted. The related_name="dj_profile" allows you to access the DJ 
+    # profile from the User model using user.dj_profile.
+    owner = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="dj_profile"
+    )
+
+    # The dj_name field is a CharField that stores the DJ's name, with a maximum length of 100 characters.
+    dj_name = models.CharField(max_length=100)
+
+    # The slug field is a SlugField that stores a URL-friendly version of the DJ's name, with a maximum 
+    # length of 100 characters. The unique=True argument ensures that each DJ profile has a unique slug, 
+    # which is automatically generated from the DJ's name if not provided.
+    slug = models.SlugField(
+        max_length=100,
+        unique=True
+    )
+
+    # The bio field is a TextField that stores a brief biography or description of the DJ.
+    bio = models.TextField()
+
+    # The genres field is a CharField that stores the musical genres associated with the DJ, with a 
+    # maximum length of 200 characters. This allows users to specify the types of music they play
+    genres = models.CharField(max_length=200)
+
+    # The location field is a CharField that stores the DJ's location, with a maximum length of 100 characters.
+    location = models.CharField(max_length=100)
+
+    # The image field is a CloudinaryField that allows users to upload an image for their DJ profile.
+    image = CloudinaryField(
+        "image",
+        blank=True,
+        null=True
+    )
+
+    # The website field is a URLField that stores the DJ's personal or professional website link.
+    website = models.URLField(blank=True)
+
+    # The social_media field is a URLField that stores the DJ's social media profile link, allowing
+    # users to link to the DJ's social media profiles.
+    social_media = models.URLField(blank=True)
+
+    # The created_on field is a DateTimeField that automatically records the date and time when the 
+    # DJ profile is created. The auto_now_add=True argument means that the field is set to the current
+    # date and time when the profile is first created, and it cannot be changed afterward.
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    # The updated_on field is a DateTimeField that automatically records the date and time when the
+    # DJ profile is last updated. The auto_now=True argument means that the field is updated whenever
+    # the profile is saved, allowing you to track when the profile was last modified.
+    updated_on = models.DateTimeField(auto_now=True)
+
+        # The Meta class sets the default ordering of DJ profiles to be in ascending order based on 
+        # the dj_name field.
+    class Meta:
+        ordering = ["dj_name"]
+
+    # The __str__ method provides a human-readable representation of the DJProfile instance, 
+    # which is the DJ's name.
+    def __str__(self):
+        return self.dj_name
+
+    # The save method is overridden to automatically generate a slug from the DJ's name before saving the
+    # DJProfile instance to the database. This ensures that each DJ profile has a unique identifier.
+    def save(self, *args, **kwargs):
+        """
+        Generate a slug from the DJ name before saving.
+        """
+        # If the slug field is empty, generate a slug from the dj_name field using the slugify function.
+        if not self.slug:
+            self.slug = slugify(self.dj_name)
+
+        # Call the parent class's save method to save the DJProfile instance to the database.
+        super().save(*args, **kwargs)
+        
 class Comment(models.Model):
     """
     Stores a comment made by a user on an event.

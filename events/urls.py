@@ -102,4 +102,20 @@ urlpatterns = [
          # The name parameter is used to uniquely identify this URL pattern,
          # which can be useful for reverse URL matching in templates and views.
          name="event_detail"),
+     
+     # Add a URL pattern for the DJ profile creation view. The @login_required decorator in the view ensures 
+     # that only authenticated users can access it.
+     path(
+     
+     # The @login_required decorator in the view ensures that only authenticated users can access this view.
+     "dj-profiles/create/",
+     
+     # The views.dj_profile_create function is called when this URL pattern is matched.
+     views.dj_profile_create,
+     
+     # The name parameter is used to uniquely identify this URL pattern,
+     # which can be useful for reverse URL matching in templates and views.
+     name="dj_profile_create",
+     ),
+
 ]

@@ -1,7 +1,13 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Event
-from .forms import EventForm, CommentForm
+
+# Comments not imported because they are not used in this file. The Comment model 
+# is only used in the add_comment view, which is already imported from the views module.
+from .models import Event, DJProfile
+ 
+from .forms import EventForm, CommentForm, DJProfileForm
+
 from django.contrib.auth.decorators import login_required
+
 from django.contrib import messages
 
 # Create your views here.
@@ -152,6 +158,69 @@ def event_create(request):
     }
     # Render the event_form.html template with the context containing the form
     return render(request, "events/event_form.html", context)
+
+# Decorator "@login_required" to ensure that only logged-in users can access the dj_profile_create view.
+@login_required
+def dj_profile_create(request):
+    """
+    View for allowing a logged-in user to create one DJ profile.
+    """
+
+    # Prevent a user from creating more than one DJ profile. If a DJ profile already exists for the 
+    # logged-in user, they are redirected to the homepage with a warning message.
+    if DJProfile.objects.filter(owner=request.user).exists():
+        messages.warning(
+            request,
+            "You already have a DJ profile."
+        )
+        return redirect("home")
+
+    # Check if the request method is POST, showing that the user
+    # has submitted the DJ profile form. 
+    if request.method == "POST":
+        form = DJProfileForm(
+            request.POST,
+            request.FILES
+        )
+
+        # Check that all required form fields are valid. 
+        if form.is_valid():
+            # Save the form without committing it to the database yet, if it was committed now, the 
+            # owner field would be empty and cause an error.
+            profile = form.save(commit=False)
+
+            # Automatically assign the logged-in user as the owner, so they cannot create a DJ profile 
+            # for someone else.
+            profile.owner = request.user
+
+            # Save the completed DJ profile to the database.
+            profile.save()
+            
+            # Display a success message to the user after successfully creating their DJ profile.
+            messages.success(
+                request,
+                "Your DJ profile has been created successfully."
+            )
+
+            # Redirect the user to the homepage after successfully creating their DJ profile.
+            return redirect("home")
+
+    # Else - If the request method is not POST, create a new instance of the DJProfileForm to display
+    # an empty form to the user.
+    else:
+        form = DJProfileForm()
+
+    # Create a context dictionary to pass the form to the template for rendering
+    context = {
+        "form": form,
+    }
+
+    # Render the dj_profile_form.html template with the context containing the form
+    return render(
+        request,
+        "events/dj_profile_form.html",
+        context
+    )
 
 # Decorator "@login_required" to ensure that only logged-in users can access the event_edit view.
 @login_required

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Comment, Event
+from .models import Comment, Event, DJProfile
 
 
 
@@ -77,3 +77,23 @@ class CommentForm(forms.ModelForm):
         labels = {
             "body": "Add a comment:",
         }
+        
+class DJProfileForm(forms.ModelForm):
+    """
+    Form for creating and editing DJ profiles. This form is linked to the DJProfile model, and 
+    includes fields for the DJ's name, bio, genres, location, image, website, and social media links. 
+    Other fields, such as the owner and slug, are automatically set in the view and not meant to be 
+    edited by the user, so they are not included in the form.
+    """
+
+    class Meta:
+        model = DJProfile
+        fields = [
+            "dj_name",
+            "bio",
+            "genres",
+            "location",
+            "image",
+            "website",
+            "social_media",
+        ]
