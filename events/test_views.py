@@ -995,3 +995,198 @@ class CommentViewTests(TestCase):
             response,
             self.detail_url
         )
+        
+class FavouriteViewTests(TestCase):
+    """
+    Tests for adding and removing events from a user's favourites.
+    """
+
+    def setUp(self):
+        """
+        Create a user, an event, and store the relevant URLs.
+        """
+        
+        # Arrange: Create a test user who can log in and favourite events. 
+        self.user = User.objects.create_user(
+            username="favouriteuser",
+            password="testpassword"
+        )
+        
+        # Arrange: Create a test event whose favourited_by field can be 
+        # used to track which users have favourited it.
+        self.event = Event.objects.create(
+            creator=self.user,
+            title="Favourite Test Event",
+            slug="favourite-test-event",
+            description="An event used for favourite tests.",
+            venue="Test Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            lineup="Test DJ",
+            status=1
+        )
+        
+        # Store the URL for the event detail page and the toggle favourite URL using Django's reverse function.
+        # This allows us to refer to the URLs by their names instead of hardcoding them. Allows us to confirm
+        # that the user is redirected to the correct page after favouriting or unfavouriting an event.
+        self.detail_url = reverse(
+            "event_detail",
+            args=[self.event.slug]
+        )
+
+        # Store the URL for toggling the favourite status of the event. This URL will be used to test adding 
+        # and removing the event from the user's favourites.
+        self.favourite_url = reverse(
+            "toggle_favourite",
+            args=[self.event.slug]
+        )
+    def test_logged_in_user_can_favourite_an_event(self):
+        """
+        Test that a logged-in user can add an event to their favourites.
+        """
+        # Arrange: Log in as the test user
+        self.client.login(
+            username="favouriteuser",
+            password="testpassword"
+        )
+
+        # Act: Send a POST request to toggle the favourite status of the event
+        response = self.client.post(self.favourite_url)
+    
+        # Act: Reload the event from the database to ensure the favourite
+        # relationship reflects the latest changes after the POST request
+        self.event.refresh_from_db()
+
+        # Assert: The user is redirected back to the event detail page
+        self.assertRedirects(response, self.detail_url)
+
+        # Assert: The event is now in the user's favourites, proving that the manyto-many 
+        # relationship between the user and the event was successfully created.
+        self.assertTrue(self.event.favourited_by.filter(id=self.user.id).exists())
+        
+    def test_logged_in_user_can_remove_event_from_favourites(self):
+        """
+        Test that a logged-in user can remove an event from their favourites.
+        """
+
+        # Arrange: Log in as the test user
+        self.client.login(
+            username="favouriteuser",
+            password="testpassword"
+        )
+
+        # Arrange: Add the event to the user's favourites before testing removal
+        self.event.favourited_by.add(self.user)
+
+        # Act: Send a POST request to toggle the favourite status of the event
+        response = self.client.post(self.favourite_url)
+
+        # Reload the event from the database to ensure the favourite
+        # relationship reflects the latest changes after the POST request.
+        self.event.refresh_from_db()
+
+        # Assert: The user is redirected back to the event detail page
+        self.assertRedirects(response, self.detail_url)
+
+        # Assert: The event is no longer in the user's favourites
+        self.assertFalse(
+            self.event.favourited_by.filter(id=self.user.id).exists()
+        )
+        
+    def test_logged_out_user_cannot_favourite_an_event(self):
+        """
+        Test that a logged-out user cannot add an event to their favourites.
+        """
+
+        # Act: Try to favourite the event without logging in
+        response = self.client.post(self.favourite_url)
+
+        # Reload the event from the database to ensure the favourite
+        # relationship reflects the latest changes after the POST request.
+        self.event.refresh_from_db()
+
+        # Assert: The user is redirected to the login page because
+        # the view is protected by the @login_required decorator.
+        self.assertRedirects(
+            response,
+            f"/accounts/login/?next={self.favourite_url}"
+        )
+
+        # Assert: The event has not been added to the user's favourites.
+        self.assertFalse(
+            self.event.favourited_by.filter(id=self.user.id).exists()
+    )
+    
+    def test_favourites_are_specific_to_each_user(self):
+        """
+        Test that favouriting an event only applies to the logged-in user.
+        """
+        
+        # Arrange: Create a second user so we can verify that favourites
+        # are stored separately for each user.
+        other_user = User.objects.create_user(
+            username="otherfavouriteuser",
+            password="testpassword"
+        )
+
+        # Add the event to the original user's favourites, so we can 
+        # check that the other user does not have it in their favourites.
+        self.event.favourited_by.add(self.user)
+
+        # Assert: The original user has favourited the event, showing that 
+        # the many-to-many relationship is working correctly for that user.
+        self.assertTrue(
+            self.event.favourited_by.filter(id=self.user.id).exists()
+        )
+
+        # Assert: The second user has not favourited the event, proving that 
+        # favouriting is specific to each user and does not affect other users' favourites.
+        self.assertFalse(
+            self.event.favourited_by.filter(id=other_user.id).exists()
+        )
+    
+    def test_event_detail_shows_correct_favourite_status(self):
+        """
+        Test that the event detail view correctly identifies
+        whether the logged-in user has favourited the event.
+        """
+        # Arrange: Log in and favourite the event, so we can check that the event detail view 
+        # correctly identifies the favourite status for the logged-in user.
+        self.client.login(
+            username="favouriteuser",
+            password="testpassword"
+        )
+        
+        # Arrange: Add the event to the user's favourites so the
+        # event detail view should recognise it as favourited.
+        self.event.favourited_by.add(self.user)
+
+        # Act: Request the event detail page for the event
+        response = self.client.get(self.detail_url)
+
+        # Assert: The view passes True for is_favourited in the context, showing that the logged-in 
+        # user has favourited the event.
+        self.assertTrue(response.context["is_favourited"])
+        
+    def test_event_detail_shows_unfavourited_status(self):
+        """
+        Test that the event detail view correctly identifies
+        when the logged-in user has not favourited the event.
+        """
+
+        # Arrange: Log in as the test user without favouriting the event,
+        # so we can check that the event detail view correctly identifies
+        # that the event has not been favourited.
+        self.client.login(
+            username="favouriteuser",
+            password="testpassword"
+        )
+
+        # Act: Request the event detail page for the event, which should
+        # include the favourite status in the context.
+        response = self.client.get(self.detail_url)
+
+        # Assert: The view passes False for is_favourited in the context,
+        # indicating that the logged-in user has not favourited the event.
+        self.assertFalse(response.context["is_favourited"])
