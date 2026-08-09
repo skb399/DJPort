@@ -164,4 +164,16 @@ urlpatterns = [
           # which can be useful for reverse URL matching in templates and views.
           name="dj_profile_edit",
           ),
+     
+     path(
+          # Add a URL pattern for the DJ profile delete view, which allows logged-in users to delete an existing DJ profile.
+          "dj-profiles/<slug:slug>/delete/",
+          
+          # The views.dj_profile_delete function is called when this URL pattern is matched.
+          views.dj_profile_delete,
+          
+          # The name parameter is used to uniquely identify this URL pattern,
+          # which can be useful for reverse URL matching in templates and views.
+          name="dj_profile_delete",
+          ),
 ]

@@ -57,14 +57,18 @@
             
             <!-- If the logged-in user is the owner of the DJ profile, show the edit button -->
             {% if user == dj_profile.owner %}
-            <div class="text-center mt-4">    
-            <a
-                    href="{% url 'dj_profile_edit' dj_profile.slug %}"
-                    class="btn btn-primary"
-                >
+            <div class="text-center mt-4">
+
+            <a href="{% url 'dj_profile_edit' dj_profile.slug %}"
+                    class="btn btn-primary">
                     Edit Profile
-                </a>
-            </div>
+            </a>
+
+            <a href="{% url 'dj_profile_delete' dj_profile.slug %}"
+                class="btn btn-danger">
+                Delete Profile
+            </a>
+            
             {% endif %}
 
             <div class="text-center mt-4">

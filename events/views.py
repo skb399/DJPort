@@ -409,3 +409,47 @@ def dj_profile_edit(request, slug):
         "events/dj_profile_form.html",
         context
     )
+
+# Decorator "@login_required" to ensure that only logged-in users can access the dj_profile_delete view.
+@login_required
+def dj_profile_delete(request, slug):
+    """
+    Allow a DJ profile owner to delete their own profile.
+    """
+    
+    # Retrieve the DJ profile with the matching slug. If no profile is found, return a 404 page.
+    dj_profile = get_object_or_404(DJProfile, slug=slug)
+
+    # If the logged-in user is not the owner of the DJ profile,
+    # they are redirected to the DJ profile detail page instead of being allowed to delete it.
+    if dj_profile.owner != request.user:
+        return redirect(
+            "dj_profile_detail",
+            slug=dj_profile.slug
+        )
+
+    # If the request method is POST, delete the DJ profile and redirect the user to the DJ 
+    # profile list page with a success message. So the DJ profile is only deleted after the 
+    # user confirms the deletion.
+    if request.method == "POST":
+        dj_profile.delete()
+
+        messages.success(
+            request,
+            "Your DJ profile has been deleted successfully."
+        )
+
+        return redirect("dj_profile_list")
+
+    # If the request method is GET, display the confirmation page to the user before 
+    # deleting the DJ profile.
+    context = {
+        "dj_profile": dj_profile,
+    }
+
+    # Render the dj_profile_confirm_delete.html template with the context containing the DJ profile
+    return render(
+        request,
+        "events/dj_profile_confirm_delete.html",
+        context
+    )
