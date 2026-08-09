@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Event, Comment
+from .models import Event, Comment, DJProfile
 
 class EventListViewTests(TestCase):
     # Arrange: Set up test data for the EventListView tests
@@ -284,6 +284,7 @@ class EventCreateViewTests(TestCase):
                 args=[created_event.slug]
             )
         )
+        
     def test_invalid_form_does_not_create_event(self):
         """
         Test that invalid form data does not create an event
@@ -1190,3 +1191,182 @@ class FavouriteViewTests(TestCase):
         # Assert: The view passes False for is_favourited in the context,
         # indicating that the logged-in user has not favourited the event.
         self.assertFalse(response.context["is_favourited"])
+        
+class DJProfileCreateViewTests(TestCase):
+    """
+    Tests for creating DJ profiles.
+    """
+
+    def setUp(self):
+        """
+        Create a test user and store the DJ profile creation URL.
+        """
+        self.user = User.objects.create_user(
+            username="djuser",
+            password="testpassword"
+        )
+
+        # Store the URL for creating a DJ profile using Django's reverse function. 
+        # This allows us to refer to the URL by its name instead of hardcoding it. 
+        self.create_url = reverse("dj_profile_create")
+        
+    def test_logged_in_user_can_access_dj_profile_create_page(self):
+        """
+        Test that a logged-in user can access the DJ Profile creation page.
+        """
+        # Arrange: Log the test user in
+        self.client.login(
+            username="djuser",
+            password="testpassword"
+        )
+
+        # Act: Request the dj profile creation page, which should be accessible to logged-in users
+        response = self.client.get(self.create_url)
+
+        # Assert: The page loads and uses the correct template
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "events/dj_profile_form.html")
+        
+    def test_logged_out_user_cannot_access_dj_profile_create_page(self):
+        """
+        Test that a logged-out user cannot access the dj profile creation page.
+        """
+        # Act: Request the protected page without logging in, the user should be redirected to the login page
+        response = self.client.get(self.create_url)
+
+        # Assert: The user is redirected to the login page, with a 302 status code and the correct redirect URL
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f"{reverse('account_login')}?next={self.create_url}"
+        )
+        
+    def test_logged_in_user_can_create_dj_profile(self):
+        """
+        Test that a logged-in user can submit valid data
+        and create a new DJ profile.
+        """
+        # Arrange: Log the user in
+        self.client.login(
+            username="djuser",
+            password="testpassword"
+        )
+
+        # Arrange: Prepare valid form data for creating a new DJ profile. image, website, and social_media fields 
+        # not included because they're optional
+        form_data = {
+            "dj_name": "Test DJ",
+            "bio": "A test DJ profile created through the form.",
+            "genres": "Test genre",
+            "location": "Manchester",
+        }
+
+        # Act: Submit the form, which should create a new DJ profile.
+        response = self.client.post(
+            self.create_url,
+            data=form_data
+        )
+
+        # Assert: One DJ profile was created.
+        self.assertEqual(DJProfile.objects.count(), 1)
+
+        # Retrieve the created DJ profile so we can inspect it.
+        dj_profile = DJProfile.objects.get()
+
+        # Assert: The view assigned the logged-in user as owner.
+        self.assertEqual(dj_profile.owner, self.user)
+
+        # Assert: The submitted DJ name was saved correctly.
+        self.assertEqual(dj_profile.dj_name, "Test DJ")
+
+        # Assert: The user is redirected to the homepage after creation.
+        self.assertRedirects(response, reverse("home"))
+        
+    def test_user_cannot_create_second_dj_profile(self):
+        """
+        Test that a user cannot create more than one DJ profile.
+        """
+        # Arrange: Log the user in
+        self.client.login(
+            username="djuser",
+            password="testpassword"
+        )
+
+        # Arrange: Create an initial DJ profile for the user, so we 
+        # can test that they cannot create a second one.
+        DJProfile.objects.create(
+            owner=self.user,
+            dj_name="Existing DJ",
+            bio="An existing DJ profile.",
+            genres="Existing genre",
+            location="Manchester"
+        )
+
+        # Act: Attempt to create a second DJ profile for the same user
+        response = self.client.post(
+            self.create_url,
+            data={
+                "dj_name": "Second DJ",
+                "bio": "Attempting to create a second DJ profile.",
+                "genres": "Second genre",
+                "location": "Liverpool"
+            }
+        )
+
+        # Assert: The user is redirected to the homepage.
+        self.assertRedirects(response, reverse("home"))
+
+        # Assert: No second DJ profile was created.
+        self.assertEqual(DJProfile.objects.count(), 1)
+
+        # Assert: A warning message tells the user that they already have a DJ profile.
+        messages_list = list(response.wsgi_request._messages)
+
+        self.assertEqual(
+            str(messages_list[0]),
+            "You already have a DJ profile."
+        )
+        
+    def test_invalid_form_does_not_create_dj_profile(self):
+        """
+        Test that invalid DJ profile form data does not create a profile.
+        """
+        # Arrange: Log the user in
+        self.client.login(
+            username="djuser",
+            password="testpassword"
+        )
+
+        # Arrange: Prepare invalid form data with the required DJ name missing. 
+        # " " used for dj_name to simulate a user submitting a form without 
+        # filling in the required field.
+        invalid_form_data = {
+            "dj_name": "",
+            "bio": "A DJ profile without a name.",
+            "genres": "House",
+            "location": "Manchester",
+        }
+
+        # Act: Submit the invalid form data.
+        response = self.client.post(
+            self.create_url,
+            data=invalid_form_data
+        )
+
+        # Assert: No DJ profile was created, as the profile count remains 0, proving
+        # that invalid form data does not create a new DJ profile.
+        self.assertEqual(DJProfile.objects.count(), 0)
+
+        # Assert: The form is redisplayed instead of redirecting.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/dj_profile_form.html"
+        )
+
+        # Assert: The DJ name field contains the expected validation error.
+        self.assertFormError(
+            response.context["form"],
+            "dj_name",
+            "This field is required."
+        )
