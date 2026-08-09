@@ -147,8 +147,21 @@ urlpatterns = [
         # The views.dj_profile_detail function is called when this URL pattern is matched.
         views.dj_profile_detail,
         
-        # The name parameter is used to uniquely identify this URL pattern,
+        # The name parameter is used to uniquely identify this URL pattern, 
+        # which can be useful for reverse URL matching in templates and views.
         name="dj_profile_detail",
     ),
 
+     path(
+          
+          # Add a URL pattern for the DJ profile edit view, which allows logged-in users to edit an existing DJ profile.
+          "dj-profiles/<slug:slug>/edit/",
+          
+          # The views.dj_profile_edit function is called when this URL pattern is matched.
+          views.dj_profile_edit,
+          
+          # The name parameter is used to uniquely identify this URL pattern,
+          # which can be useful for reverse URL matching in templates and views.
+          name="dj_profile_edit",
+          ),
 ]

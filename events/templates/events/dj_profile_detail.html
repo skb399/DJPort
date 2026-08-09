@@ -54,6 +54,18 @@
                     </a>
                 </p>
             {% endif %}
+            
+            <!-- If the logged-in user is the owner of the DJ profile, show the edit button -->
+            {% if user == dj_profile.owner %}
+            <div class="text-center mt-4">    
+            <a
+                    href="{% url 'dj_profile_edit' dj_profile.slug %}"
+                    class="btn btn-primary"
+                >
+                    Edit Profile
+                </a>
+            </div>
+            {% endif %}
 
             <div class="text-center mt-4">
             <a
@@ -62,6 +74,7 @@
             >
                 Back to DJ Profiles
             </a>
+
             </div>
         </div>
     </div>

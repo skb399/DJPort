@@ -346,3 +346,66 @@ def dj_profile_detail(request, slug):
         "events/dj_profile_detail.html",
         context
     )
+
+# Decorator "@login_required" to ensure that only logged-in users can access the dj_profile_edit view.
+@login_required
+def dj_profile_edit(request, slug):
+    """
+    Allow a DJ profile owner to edit their own profile.
+    """
+    # Retrieve the DJ profile with the matching slug. If no profile is found, return a 404 page.
+    dj_profile = get_object_or_404(DJProfile, slug=slug)
+
+    # Prevent users from editing another user's DJ profile. If the logged-in user is not the owner of the DJ profile,
+    # they are redirected to the DJ profile detail page instead of being allowed to edit it.
+    if dj_profile.owner != request.user:
+        return redirect(
+            "dj_profile_detail",
+            slug=dj_profile.slug
+        )
+
+    # Check if the request method is POST, which indicates that the user has submitted the form.
+    if request.method == "POST":
+        
+        # Reuse the DJProfileForm with the existing DJ profile instance,
+        # allowing the user to update their current profile details.
+        form = DJProfileForm(
+            request.POST,
+            request.FILES,
+            instance=dj_profile
+        )
+        
+        # Check if the form is valid (all required fields are filled out correctly).
+        if form.is_valid():
+            dj_profile = form.save()
+
+            messages.success(
+                request,
+                "Your DJ profile has been updated successfully."
+            )
+
+            # Redirect the user to the DJ profile detail page after successfully editing their DJ profile.
+            return redirect(
+                "dj_profile_detail",
+                slug=dj_profile.slug
+            )
+
+    # Else - If the request method is not POST, create an instance of the DJProfileForm with the existing 
+    # DJ profile data to display the form pre-filled with the current DJ profile details.
+    else:
+        # Reuse the DJProfileForm with the existing DJ profile instance
+        # to display the user's current profile details in the form.
+        form = DJProfileForm(instance=dj_profile)
+
+    # Create a context dictionary to pass the form and DJ profile to the template for rendering 
+    context = {
+        "form": form,
+        "dj_profile": dj_profile,
+    }
+    
+    # Render the dj_profile_form.html template with the context containing the form and DJ profile
+    return render(
+        request,
+        "events/dj_profile_form.html",
+        context
+    )

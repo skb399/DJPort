@@ -1469,3 +1469,5 @@ class DJProfileViewTests(TestCase):
 
         # Assert: The response status code is 404, showing that the requested DJ profile does not exist.
         self.assertEqual(response.status_code, 404)
+        
+    
