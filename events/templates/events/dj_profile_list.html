@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <h1>DJ Profiles</h1>
+    
+    <!-- If the user is authenticated, display a button to create a new DJ profile -->
+    {% if user.is_authenticated %}
+    <a
+        href="{% url 'dj_profile_create' %}"
+        class="btn btn-primary mb-4"
+    >
+        Create DJ Profile
+    </a>
+    {% endif %}
+
+    <div class="row">
+        {% for profile in dj_profiles %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+
+                    {% if profile.image %}
+                        <img
+                            src="{{ profile.image.url }}"
+                            class="card-img-top"
+                            alt="{{ profile.dj_name }}"
+                        >
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h2 class="card-title">
+                            {{ profile.dj_name }}
+                        </h2>
+                        <div class="text-center">
+                            <a
+                                href="{% url 'dj_profile_detail' profile.slug %}"
+                                class="btn btn-primary"
+                            >
+                                View Profile
+                            </a>
+                        </div>
+                        <p class="card-text">
+                            Genres: {{ profile.genres }}
+                        </p>
+
+                        <p class="card-text">
+                            Location: {{ profile.location }}
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+        {% empty %}
+            <p>No DJ profiles are currently available.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+
+            <h1>{{ dj_profile.dj_name }}</h1>
+
+            {% if dj_profile.image %}
+                <img
+                    src="{{ dj_profile.image.url }}"
+                    alt="{{ dj_profile.dj_name }}"
+                    class="img-fluid mb-4"
+                >
+            {% endif %}
+
+            <p>
+                <strong>Genres:</strong>
+                {{ dj_profile.genres }}
+            </p>
+
+            <p>
+                <strong>Location:</strong>
+                {{ dj_profile.location }}
+            </p>
+
+            <p>
+                <strong>Bio:</strong>
+                {{ dj_profile.bio }}
+            </p>
+
+            {% if dj_profile.website %}
+                <p>
+                    <strong>Website:</strong>
+                    <a
+                        href="{{ dj_profile.website }}"
+                        target="_blank"
+                    >
+                        {{ dj_profile.website }}
+                    </a>
+                </p>
+            {% endif %}
+
+            {% if dj_profile.social_media %}
+                <p>
+                    <strong>Social Media:</strong>
+                    <a
+                        href="{{ dj_profile.social_media }}"
+                        target="_blank"
+                    >
+                        {{ dj_profile.social_media }}
+                    </a>
+                </p>
+            {% endif %}
+
+            <div class="text-center mt-4">
+            <a
+                href="{% url 'dj_profile_list' %}"
+                class="btn btn-secondary"
+            >
+                Back to DJ Profiles
+            </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

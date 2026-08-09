@@ -305,3 +305,44 @@ def event_delete(request, slug):
     # A GET request displays the confirmation page.
     return render(request, "events/event_confirm_delete.html", context)
 
+# -----------------------------------------------------------------------------------------------------
+# DJ PROFILE VIEWS
+#------------------------------------------------------------------------------------------------------
+
+def dj_profile_list(request):
+    """
+    Display a list of all DJ profiles.
+    """
+    # Retrieve all DJ profiles. Filter not required as DJ profiles don't have draft or published status
+    dj_profiles = DJProfile.objects.all()
+
+    # Create a context dictionary to pass the DJ profiles to the template as Django needs 
+    # a context dictionary to render the template with the DJ profiles data. Which the template
+    # can iterate through to display the DJ profiles.
+    context = {
+        "dj_profiles": dj_profiles,
+    }
+
+    return render(request, "events/dj_profile_list.html", context)
+
+def dj_profile_detail(request, slug):
+    """
+    Display the details of a specific DJ profile based on its slug.
+    """
+    # Retrieve the DJ profile with the matching slug.
+    # If no profile is found, return a 404 page.
+    dj_profile = get_object_or_404(DJProfile, slug=slug)
+
+    # Create a context dictionary to pass the DJ profile to the template as Django needs 
+    # a context dictionary to render the template with the DJ profile data. Which the template
+    # can use to display the DJ profile details.
+    context = {
+        "dj_profile": dj_profile,
+    }
+
+    # Render the dj_profile_detail.html template with the context containing the DJ profile
+    return render(
+        request,
+        "events/dj_profile_detail.html",
+        context
+    )

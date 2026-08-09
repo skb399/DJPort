@@ -4,8 +4,12 @@ from django.urls import path
 # Importing the views module from the current package (events) to access the view functions defined in events/views.py.
 from . import views
 
-
 urlpatterns = [
+     
+# ---------------------------------------------------------------------------
+# HOME URL
+# ---------------------------------------------------------------------------
+
     # Add a URL pattern for the home page.
     path(
         # The empty string "" shows that this URL pattern matches the root URL 
@@ -16,6 +20,10 @@ urlpatterns = [
        # which can be useful for reverse URL matching in templates and views. 
         name="home"),
     
+# ---------------------------------------------------------------------------
+# EVENT URLS
+# ---------------------------------------------------------------------------
+
     # Add a URL pattern for the event list view, which displays all published events.
     path("events/", 
          # The views.event_list function is called when this URL pattern is matched.
@@ -90,7 +98,7 @@ urlpatterns = [
     # which can be useful for reverse URL matching in templates and views.
     name="toggle_favourite",
      ),
-    
+     
     # Add a URL pattern for the event detail view. For <slug:slug> - Slug is used to uniquely 
     # identify each event in the URL. The first slug is the data type, and the second slug 
     # is the variable name that will be passed to the view function.
@@ -102,6 +110,20 @@ urlpatterns = [
          # The name parameter is used to uniquely identify this URL pattern,
          # which can be useful for reverse URL matching in templates and views.
          name="event_detail"),
+     
+# ---------------------------------------------------------------------------
+# DJ PROFILE URLS
+# ---------------------------------------------------------------------------
+     
+     # Add a URL pattern for the DJ profile list view, which displays all DJ profiles.
+    path("dj-profiles/",
+        
+        # The views.dj_profile_list function is called when this URL pattern is matched. 
+        views.dj_profile_list,
+        
+        # The name parameter is used to uniquely identify this URL pattern,
+        name="dj_profile_list",
+    ),    
      
      # Add a URL pattern for the DJ profile creation view. The @login_required decorator in the view ensures 
      # that only authenticated users can access it.
@@ -117,5 +139,16 @@ urlpatterns = [
      # which can be useful for reverse URL matching in templates and views.
      name="dj_profile_create",
      ),
+     
+    path(
+         # Add a URL pattern for the DJ profile detail view, which displays the details of a specific DJ profile.
+        "dj-profiles/<slug:slug>/",
+        
+        # The views.dj_profile_detail function is called when this URL pattern is matched.
+        views.dj_profile_detail,
+        
+        # The name parameter is used to uniquely identify this URL pattern,
+        name="dj_profile_detail",
+    ),
 
 ]
