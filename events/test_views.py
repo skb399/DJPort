@@ -1470,4 +1470,255 @@ class DJProfileViewTests(TestCase):
         # Assert: The response status code is 404, showing that the requested DJ profile does not exist.
         self.assertEqual(response.status_code, 404)
         
+class DJProfileEditViewTests(TestCase):
+    """
+    Tests for editing DJ profiles.
+    """
+
+    def setUp(self):
+        """
+        Create a profile owner, another user, a DJ profile,
+        and store the edit and detail URLs.
+        """
+        
+        # Arrange: Create a test user who owns the DJ profile and can edit it.
+        self.owner = User.objects.create_user(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Arrange: Create another test user who does not own the DJ profile, 
+        # to test that only the owner can edit it.
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Arrange: Create a DJ profile owned by the first user, which will be 
+        # used to test editing.
+        self.dj_profile = DJProfile.objects.create(
+            owner=self.owner,
+            dj_name="Original DJ",
+            slug="original-dj",
+            bio="Original DJ bio.",
+            genres="House",
+            location="Manchester",
+            website="https://example.com",
+            social_media="https://instagram.com/originaldj"
+        )
+
+        # Store the URL for editing the DJ profile using Django's reverse function, 
+        # which allows us to refer to the URL by its name instead of hardcoding it. 
+        # This URL will be used to test editing the DJ profile.
+        self.edit_url = reverse(
+            "dj_profile_edit",
+            args=[self.dj_profile.slug]
+        )
+
+        # Store the URL for viewing the DJ profile detail page using Django's reverse function,
+        # which allows us to refer to the URL by its name instead of hardcoding it. 
+        # This URL will be used to test viewing the DJ profile.
+        self.detail_url = reverse(
+            "dj_profile_detail",
+            args=[self.dj_profile.slug]
+        )
     
+    def test_owner_can_access_dj_profile_edit_page(self):
+        """
+        Test that the DJ profile owner can access the edit page.
+        """
+
+        # Arrange: Log in as the owner of the DJ profile.
+        self.client.login(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Act: Request the DJ profile edit page.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The page loads successfully and uses the correct template.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/dj_profile_form.html"
+        )
+        
+    def test_edit_form_is_prefilled_with_existing_profile(self):
+        """
+        Test that the DJ profile edit form is pre-filled
+        with the existing profile data.
+        """
+
+        # Arrange: Log in as the owner of the DJ profile.
+        self.client.login(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Act: Request the DJ profile edit page.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The form is linked to the existing DJ profile instance.
+        self.assertEqual(
+            # The form instance in the response context should be the same
+            # as the DJ profile instance we created in setUp.
+            response.context["form"].instance,
+            self.dj_profile
+        )
+
+        # Assert: The form contains the existing DJ profile data.
+        self.assertEqual(
+            response.context["form"].initial["dj_name"],
+            "Original DJ"
+        )
+        
+    def test_owner_can_update_dj_profile(self):
+        """
+        Test that the DJ profile owner can submit valid data
+        and update their existing profile.
+        """
+
+        # Arrange: Log in as the owner of the DJ profile.
+        self.client.login(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Arrange: Prepare valid updated profile data.
+        updated_form_data = {
+            "dj_name": "Updated DJ",
+            "bio": "This DJ profile has been updated.",
+            "genres": "Techno, Disco",
+            "location": "Liverpool",
+            "website": "https://updated-example.com",
+            "social_media": "https://instagram.com/updateddj",
+        }
+
+        # Act: Submit the updated data to the DJ profile edit view.
+        response = self.client.post(
+            self.edit_url,
+            data=updated_form_data
+        )
+
+        # Assert: Editing did not create a second DJ profile, as the count of DJ profiles 
+        # in the database remains 1, proving that the existing profile was updated instead
+        # of creating a new one.
+        self.assertEqual(DJProfile.objects.count(), 1)
+
+        # Reload the profile from the database so the instance contains
+        # the latest values after the update.
+        self.dj_profile.refresh_from_db()
+
+        # Assert: The existing DJ profile and relevant fields were updated successfully.
+        self.assertEqual(
+            self.dj_profile.bio,
+            "This DJ profile has been updated."
+        )
+        self.assertEqual(self.dj_profile.genres, "Techno, Disco")
+        self.assertEqual(self.dj_profile.location, "Liverpool")
+        self.assertEqual(
+            self.dj_profile.website,
+            "https://updated-example.com"
+        )
+        self.assertEqual(
+            self.dj_profile.social_media,
+            "https://instagram.com/updateddj"
+        )
+
+        # Assert: The user is redirected to the updated profile detail page.
+        self.assertRedirects(
+            response,
+            reverse(
+                "dj_profile_detail",
+                # The slug remains unchanged because the model only generates it
+                # when the slug field is empty.
+                args=[self.dj_profile.slug]
+            )
+        )
+        
+    def test_non_owner_cannot_access_dj_profile_edit_page(self):
+        """
+        Test that a logged-in user cannot edit another user's DJ profile.
+        """
+
+        # Arrange: Log in as a different user who does not own the DJ profile.
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Attempt to access the DJ profile edit page.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The non-owner is redirected to the DJ profile detail page.
+        self.assertRedirects(
+            response,
+            self.detail_url
+        )
+        
+    def test_logged_out_user_is_redirected_from_dj_profile_edit_page(self):
+        """
+        Test that a logged-out user cannot access the DJ profile edit page.
+        """
+
+        # Act: Request the DJ profile edit page without logging in.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The user is redirected to the login page with the edit URL
+        # stored in the next parameter.
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f"{reverse('account_login')}?next={self.edit_url}"
+        )
+        
+    def test_invalid_form_does_not_update_dj_profile(self):
+        """
+        Test that invalid form data does not update the existing DJ profile.
+        """
+
+        # Arrange: Log in as the owner of the DJ profile.
+        self.client.login(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Arrange: Prepare invalid form data with the required DJ name missing. "" used for dj_name 
+        # to simulate a user submitting a form without filling in the required field.
+        invalid_form_data = {
+            "dj_name": "",
+            "bio": "This should not be saved.",
+            "genres": "Techno",
+            "location": "Liverpool",
+        }
+
+        # Act: Submit the invalid form data to the edit view.
+        response = self.client.post(
+            self.edit_url,
+            data=invalid_form_data
+        )
+
+        # Reload the DJ profile from the database to check that its
+        # existing data has not been changed.
+        self.dj_profile.refresh_from_db()
+
+        # Assert: The original DJ profile data remains unchanged.
+        self.assertEqual(self.dj_profile.dj_name, "Original DJ")
+        self.assertEqual(self.dj_profile.bio, "Original DJ bio.")
+        self.assertEqual(self.dj_profile.genres, "House")
+        self.assertEqual(self.dj_profile.location, "Manchester")
+
+        # Assert: The invalid form is displayed again rather than redirecting.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/dj_profile_form.html"
+        )
+
+        # Assert: The DJ name field contains the expected validation error.
+        self.assertFormError(
+            response.context["form"],
+            "dj_name",
+            "This field is required."
+        )
