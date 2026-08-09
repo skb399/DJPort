@@ -1370,3 +1370,102 @@ class DJProfileCreateViewTests(TestCase):
             "dj_name",
             "This field is required."
         )
+        
+class DJProfileViewTests(TestCase):
+    """
+    Tests for viewing DJ profiles. 
+    """
+
+    def setUp(self):
+        """
+        Create a user, a DJ profile, and store the relevant URLs.
+        """
+        
+        # Arrange: Create a test user who can log in and view DJ profiles.
+        self.user = User.objects.create_user(
+            username="djviewer",
+            password="testpassword"
+        )
+
+        # Arrange: Create a DJ profile for the test user, which will be used to test viewing DJ profiles.
+        self.dj_profile = DJProfile.objects.create(
+            owner=self.user,
+            dj_name="Test DJ",
+            slug="test-dj",
+            bio="A DJ profile used for view tests.",
+            genres="House, Techno",
+            location="Manchester",
+            website="https://example.com",
+            social_media="https://instagram.com/testdj"
+        )
+
+        # Store the URL for the DJ profile list and detail pages using Django's reverse function.
+        # This allows us to refer to the URLs by their names instead of hardcoding them.
+        self.list_url = reverse("dj_profile_list")
+
+        # Store the URL for the DJ profile detail page using the slug of the created DJ profile.
+        self.detail_url = reverse(
+            "dj_profile_detail",
+            args=[self.dj_profile.slug]
+        )
+        
+    def test_dj_profile_list_page_loads_successfully(self):
+        """
+        Test that the DJ profile list page loads successfully and uses the correct template.
+        """
+        # Act: Request the DJ profile list page
+        response = self.client.get(self.list_url)
+
+        # Assert: The page loads with a 200 status code and uses the correct template
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "events/dj_profile_list.html")
+        
+    def test_dj_profile_list_displays_dj_profile(self):
+        """
+        Test that a DJ profile is displayed on the DJ profile list page.
+        """ 
+        # Act: Request the DJ profile list page
+        response = self.client.get(self.list_url)
+
+        # Assert: The page contains the DJ name of the created DJ profile, proving that it is displayed on the list page.
+        self.assertContains(response, "Test DJ")
+        
+    def test_dj_profile_detail_page_loads_successfully(self):
+        """
+        Test that a DJ profile detail page loads successfully
+        and uses the correct template.
+        """
+        # Act: Request the DJ profile detail page for the created DJ profile
+        response = self.client.get(self.detail_url)
+
+        # Assert: The page loads with a 200 status code and uses the correct template
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "events/dj_profile_detail.html")
+        
+    def test_dj_profile_detail_displays_correct_profile(self):
+        """
+        Test that the DJ profile detail page displays
+        the correct DJ profile information.
+        """
+        # Act: Request the DJ profile detail page for the created DJ profile
+        response = self.client.get(self.detail_url)
+
+        # Assert: The page contains the DJ name, bio, genres, location, website, and social media of the created DJ profile,
+        # proving that the correct profile information is displayed on the detail page.
+        self.assertContains(response, "Test DJ")
+        self.assertContains(response, "A DJ profile used for view tests.")
+        self.assertContains(response, "House, Techno")
+        self.assertContains(response, "Manchester")
+        self.assertContains(response, "https://example.com")
+        self.assertContains(response, "https://instagram.com/testdj")
+        
+    def test_invalid_dj_profile_slug_returns_404(self):
+        """
+        Test that requesting a DJ profile that does not exist
+        returns a 404 response.
+        """
+        # Act: Request a DJ profile detail page with an invalid slug
+        response = self.client.get(reverse("dj_profile_detail", args=["nonexistent-dj"]))
+
+        # Assert: The response status code is 404, showing that the requested DJ profile does not exist.
+        self.assertEqual(response.status_code, 404)
