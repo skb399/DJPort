@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <h2>Delete Comment</h2>
+
+            <p>
+                Are you sure you want to delete this comment?
+            </p>
+
+            <blockquote class="blockquote">
+                <p>{{ comment.body }}</p>
+            </blockquote>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                >
+                    Delete
+                </button>
+
+                <a
+                    href="{% url 'event_detail' comment.event.slug %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

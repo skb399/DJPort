@@ -73,6 +73,13 @@
                         >
                             Edit Comment
                         </a>
+
+                        <a
+                            href="{% url 'delete_comment' comment.id %}"
+                            class="btn btn-sm btn-outline-danger"
+                        >
+                            Delete
+                        </a>
                     {% endif %}
                 
                 <!-- If there are no comments, display a message -->

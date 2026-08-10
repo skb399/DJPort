@@ -112,6 +112,14 @@ urlpatterns = [
     # which can be useful for reverse URL matching in templates and views.
     name="toggle_favourite",
      ),
+    
+    # Add a URL pattern for the delete comment view, which allows logged-in users to 
+    # delete their own comments on an event.
+    path(
+     "comments/<int:comment_id>/delete/",
+     views.delete_comment,
+     name="delete_comment"
+          ),
      
     # Add a URL pattern for the event detail view. For <slug:slug> - Slug is used to uniquely 
     # identify each event in the URL. The first slug is the data type, and the second slug 

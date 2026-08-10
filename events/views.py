@@ -175,7 +175,52 @@ def edit_comment(request, comment_id):
         "events/comment_edit.html",
         context
     )
+@login_required
+def delete_comment(request, comment_id):
+    """
+    Allow a logged-in user to delete their own comment.
+    """
 
+    # Retrieve the comment using its ID.
+    # If the comment does not exist, return a 404 error.
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Prevent users from deleting comments they do not own.
+    if comment.author != request.user:
+        return redirect(
+            "event_detail",
+            slug=comment.event.slug
+        )
+
+    # Store the event slug before deleting the comment,
+    # so we can redirect back to the correct event afterward.
+    event_slug = comment.event.slug
+
+    # Only delete the comment when the confirmation form is submitted.
+    if request.method == "POST":
+        comment.delete()
+
+        messages.success(
+            request,
+            "Your comment has been deleted successfully."
+        )
+
+        return redirect(
+            "event_detail",
+            slug=event_slug
+        )
+
+    # A GET request displays the confirmation page.
+    context = {
+        "comment": comment,
+    }
+
+    return render(
+        request,
+        "events/comment_delete.html",
+        context
+    )
+    
 # Decorator "@login_required" to ensure that only logged-in users can access the toggle_favourite view.
 @login_required
 def toggle_favourite(request, slug):
