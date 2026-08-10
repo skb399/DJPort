@@ -2696,3 +2696,51 @@ class FavouriteEventsViewTests(TestCase):
             response,
             f'href="{expected_url}"'
         )
+        
+class Custom404Tests(TestCase):
+    """
+    Tests for the custom 404 error page.
+    """   
+
+    def test_invalid_url_returns_404_status(self):
+        """
+        Test that requesting a non-existent URL
+        returns a 404 HTTP status.
+        """
+
+        # Act: Request a URL that does not exist.
+        response = self.client.get("/this-page-does-not-exist/")
+
+        # Assert: The response has a 404 status code.
+        self.assertEqual(response.status_code, 404)
+
+    def test_custom_404_template_is_used(self):
+        """
+        Test that the custom 404 template is displayed
+        for a non-existent URL.
+        """
+
+        # Act: Request a URL that does not exist.
+        response = self.client.get("/this-page-does-not-exist/")
+
+        # Assert: The custom 404 template is used.
+        self.assertTemplateUsed(
+            response,
+            "404.html"
+        )
+
+    def test_custom_404_contains_return_home_link(self):
+        """
+        Test that the custom 404 page contains
+        a link back to the homepage.
+        """
+
+        # Act: Request a URL that does not exist.
+        response = self.client.get("/this-page-does-not-exist/")
+
+        # Assert: The response contains the homepage URL.
+        self.assertContains(
+            response,
+            reverse("home"),
+            status_code=404
+        )
