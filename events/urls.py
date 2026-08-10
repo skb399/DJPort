@@ -25,12 +25,16 @@ urlpatterns = [
 # ---------------------------------------------------------------------------
 
     # Add a URL pattern for the event list view, which displays all published events.
-    path("events/", 
+    path(
+         # Define the URL path used to access the event list view. The "events/" string shows that this URL pattern matches
+         # the /events/ URL path.
+         "events/", 
          # The views.event_list function is called when this URL pattern is matched.
          views.event_list, 
-         # The name parameter is used to uniquely identify this URL pattern,
-         # which can be useful for reverse URL matching in templates and views.
-         name="event_list"),
+         # Give the URL pattern a name so it can be referenced
+         # in templates and views using Django's URL reversing.
+         name="event_list"
+         ),
    
     # Add a URL pattern for the event creation view, which is only accessible to logged-in users. 
     # The @login_required decorator in the views ensure that only authenticated users can access 
@@ -39,32 +43,33 @@ urlpatterns = [
          
          # The views.event_create function is called when this URL pattern is matched.
          views.event_create,
-         
-         # The name parameter is used to uniquely identify this URL pattern,
-         # which can be useful for reverse URL matching in templates and views.
-         name="event_create"),
+         name="event_create"
+         ),
     
     # Add a URL pattern for the event edit view, this allows logged-in users to edit an existing event.
     # URL ordering is important in Django, as the first matching pattern will be used, so this needs to go
     # before the event detail view to avoid conflicts. If the event detail view was placed before this,
     # it would match any URL with a slug and prevent access to the event edit view.
-    path("events/<slug:slug>/edit/", 
-   
-    # The views.event_edit function is called when this URL pattern is matched. 
-    # The <slug:slug> part of the URL captures the slug of the event to be edited
-    # and passes it as an argument to the view function.
-    views.event_edit,
-   
-    # The name parameter is used to uniquely identify this URL pattern,
-    # which can be useful for reverse URL matching in templates and views.
-    name="event_edit",
-    ),
+    path(
+          # Define a URL pattern for the event edit view. The <slug:slug> part of the URL captures the slug of 
+          # the event to be edited and passes it as an argument to the view function. The first slug is the data type,
+          # and the second slug is the variable name that will be passed to the view function.
+          "events/<slug:slug>/edit/", 
+               
+          # The views.event_edit function is called when this URL pattern is matched.The <slug:slug> part of the URL 
+          # captures the slug of the event to be edited, and passes it as an argument to the view function.
+          views.event_edit,
+          name="event_edit",
+     ),
     
     # Adds a URL pattern for the event delete view, which allows logged-in users to delete an existing event.
     # URL ordering is important in Django, as the first matching pattern will be used, so this needs to go before
     # the event detail view to avoid conflicts. If the event detail view was placed before this,
     # it would match any URL with a slug and prevent access to the event delete view.
     path(
+    # Define a URL pattern for the event delete view, which allows logged-in users to delete an existing event, the slug 
+    # is used to uniquely identify each event in the URL. The first slug is the data type, and the second slug is the variable
+    # name that will be passed to the view function. 
     "events/<slug:slug>/delete/",
     
     # The views.event_delete function is called when this URL pattern is matched.
@@ -77,6 +82,7 @@ urlpatterns = [
     
     # Add a URL pattern for the add comment view, which allows logged-in users to add comments to an event. 
     path(
+     # Define a URL pattern for the add comment view
      "events/<slug:slug>/comment/",
      
      # The views.add_comment function is called when this URL pattern is matched.
@@ -88,7 +94,7 @@ urlpatterns = [
      ),
     
     path(
-    # Add a URL pattern for the toggle favourite view, which allows logged-in users to add or remove an event from their favourites.     
+    # Define a URL pattern for the toggle favourite view    
     "events/<slug:slug>/favourite/",
     
     # The views.toggle_favourite function is called when this URL pattern is matched.
@@ -111,6 +117,16 @@ urlpatterns = [
          # which can be useful for reverse URL matching in templates and views.
          name="event_detail"),
      
+     # Add a URL pattern for the logged-in user's favourite events page.
+     path(
+     # Define the URL path used to access the favourite events page 
+     "favourites/",
+     # The views.favourite_events function is called when this URL pattern is matched.
+     views.favourite_events,
+     # The name parameter is used to uniquely identify this URL pattern,
+     # which can be useful for reverse URL matching in templates and views.
+     name="favourite_events",
+     ),
 # ---------------------------------------------------------------------------
 # DJ PROFILE URLS
 # ---------------------------------------------------------------------------
@@ -172,8 +188,8 @@ urlpatterns = [
           # The views.dj_profile_delete function is called when this URL pattern is matched.
           views.dj_profile_delete,
           
-          # The name parameter is used to uniquely identify this URL pattern,
-          # which can be useful for reverse URL matching in templates and views.
+          # Give the URL pattern a name so it can be referenced
+          # in templates and views using Django's URL reversing.
           name="dj_profile_delete",
           ),
 ]

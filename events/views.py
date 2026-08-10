@@ -472,3 +472,25 @@ def dj_profile_delete(request, slug):
         "events/dj_profile_confirm_delete.html",
         context
     )
+    
+@login_required
+def favourite_events(request):
+    """
+    Display the logged-in user's favourite events.
+    """
+
+    # Retrieve all events favourited by the logged-in user.
+    favourite_events = request.user.favourite_events.all()
+
+    # Pass the user's favourite events to the template.
+    context = {
+        "favourite_events": favourite_events,
+    }
+
+    # Render the favourite_events.html template with the context containing 
+    # the user's favourite events
+    return render(
+        request,
+        "events/favourite_events.html",
+        context
+    )
