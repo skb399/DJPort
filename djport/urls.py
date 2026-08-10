@@ -22,3 +22,7 @@ urlpatterns = [
     path("", include("events.urls")),
     path('accounts/', include('allauth.urls')),
 ]
+
+
+#CUSTOM 404 PAGE
+handler404 = "events.views.custom_404"

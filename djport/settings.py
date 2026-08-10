@@ -35,7 +35,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production! DEBUG SHOULD BE SET TO FALSE FOR HEROKU DEPLOYMENT. 
 # This is because DEBUG mode can expose sensitive information about the application.
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "localhost",

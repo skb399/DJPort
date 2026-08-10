@@ -597,3 +597,15 @@ def favourite_events(request):
         "events/favourite_events.html",
         context
     )
+    
+def custom_404(request, exception):
+    """
+    Display a custom 404 page when a requested page cannot be found.
+    """
+    # The custom 404 page is displayed when a user tries to access a page that 
+    # does not exist on the website.
+    return render(
+        request,
+        "404.html",
+        status=404
+    )
