@@ -10,6 +10,11 @@ from django.contrib.auth.decorators import login_required
 
 from django.contrib import messages
 
+# Q objects: Django Q objects allow more specific database queries to be processed.
+# They are useful when multiple search items need to be combined using OR (|), AND 
+# (&) or NOT (~)
+from django.db.models import Q
+
 # Create your views here.
 
 def home(request):
@@ -25,12 +30,26 @@ def event_list(request):
     """
     # Filter events to only include those with a status of 1 (Published)
     events = Event.objects.filter(status=1)
+    
+    # If a search query is provided in the request, filter the events to only include those that match the query. 
+    # request.GET.get("q") pulls the value of the q query-string parameter submitted by the search form.
+    search_query = request.GET.get("q")
+    if search_query:
+        events = events.filter(
+            # icontains =  A lookup function that is not case-sensitive
+            Q(title__icontains=search_query) |
+            Q(venue__icontains=search_query) |
+            Q(location__icontains=search_query) |
+            Q(genre__icontains=search_query) |
+            Q(lineup__icontains=search_query)
+        )
 
     # Create a context dictionary to pass the events to the template as Django needs 
     # a context dictionary to render the template with the events data. Which the template
     # can iterate through to display the events.
     context = {
         "events": events,
+        "search_query": search_query,
     }
 
     return render(request, "events/event_list.html", context)

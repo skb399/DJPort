@@ -100,6 +100,28 @@
                     </li>
                     {% endif %}
                 </ul>
+
+                <!-- Search form allowing users to search for published events -->
+                    <form
+                        class="d-flex"
+                        method="GET"
+                        action="{% url 'event_list' %}"
+                        role="search"
+                    >
+                        <input
+                            class="form-control me-2"
+                            type="search"
+                            name="q"
+                            placeholder="Search events..."
+                            aria-label="Search events"
+                            value="{{ search_query|default:'' }}"
+                        >
+
+                        <button class="btn btn-outline-light" type="submit">
+                            Search
+                        </button>
+                    </form>
+                    
                 <span class="navbar-text">
                     Discover DJs and live events
                 </span>
