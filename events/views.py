@@ -175,6 +175,7 @@ def edit_comment(request, comment_id):
         "events/comment_edit.html",
         context
     )
+    
 @login_required
 def delete_comment(request, comment_id):
     """

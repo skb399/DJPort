@@ -1356,50 +1356,213 @@ class EditCommentViewTests(TestCase):
             "body",
             "This field is required."
         )
-    @login_required
-def delete_comment(request, comment_id):
+
+class DeleteCommentViewTests(TestCase):
+    """
+    Tests for deleting an existing comment.
+    """
+
+    def setUp(self):
         """
-        Allow a logged-in user to delete their own comment.
+        Create users, an event and a comment for use in the tests.
         """
 
-        # Retrieve the comment using its ID.
-        # If the comment does not exist, return a 404 error.
-        comment = get_object_or_404(Comment, id=comment_id)
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpassword"
+        )
 
-        # Prevent users from deleting comments they do not own.
-        if comment.author != request.user:
-            return redirect(
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        self.event = Event.objects.create(
+            creator=self.other_user,
+            title="Test Event",
+            slug="test-event",
+            description="A test event.",
+            venue="Test Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            status=1
+        )
+
+        self.comment = Comment.objects.create(
+            event=self.event,
+            author=self.user,
+            body="Comment to delete",
+            approved=True
+        )
+
+        self.delete_url = reverse(
+            "delete_comment",
+            args=[self.comment.id]
+        )
+
+    def test_comment_author_can_access_delete_page(self):
+        """
+        Test that the comment author can access
+        the delete confirmation page.
+        """
+
+        # Arrange: Log in as the comment author.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the comment delete page.
+        response = self.client.get(self.delete_url)
+
+        # Assert: The page loads successfully and uses
+        # the correct template.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/comment_delete.html"
+        )
+
+    def test_get_request_does_not_delete_comment(self):
+        """
+        Test that opening the delete confirmation page
+        does not delete the comment.
+        """
+
+        # Arrange: Log in as the comment author.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the delete confirmation page.
+        self.client.get(self.delete_url)
+
+        # Assert: The comment still exists in the database.
+        self.assertTrue(
+            Comment.objects.filter(
+                id=self.comment.id
+            ).exists()
+        )
+
+    def test_comment_author_can_delete_comment(self):
+        """
+        Test that the comment author can delete
+        their own comment.
+        """
+
+        # Arrange: Log in as the comment author.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Submit the delete confirmation form.
+        response = self.client.post(self.delete_url)
+
+        # Assert: The comment has been deleted from the database.
+        self.assertFalse(
+            Comment.objects.filter(
+                id=self.comment.id
+            ).exists()
+        )
+
+        # Assert: The user is redirected back to
+        # the correct event detail page.
+        self.assertRedirects(
+            response,
+            reverse(
                 "event_detail",
-                slug=comment.event.slug
+                args=[self.event.slug]
             )
+        )
 
-        # Store the event slug before deleting the comment,
-        # so we can redirect back to the correct event afterward.
-        event_slug = comment.event.slug
+    def test_non_author_cannot_access_delete_page(self):
+        """
+        Test that another logged-in user cannot access
+        the delete confirmation page.
+        """
 
-        # Only delete the comment when the confirmation form is submitted.
-        if request.method == "POST":
-            comment.delete()
+        # Arrange: Log in as a different user.
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
 
-            messages.success(
-                request,
-                "Your comment has been deleted successfully."
-            )
+        # Act: Attempt to access the delete page.
+        response = self.client.get(self.delete_url)
 
-            return redirect(
+        # Assert: The user is redirected back to
+        # the event detail page.
+        self.assertRedirects(
+            response,
+            reverse(
                 "event_detail",
-                slug=event_slug
+                args=[self.event.slug]
             )
+        )
 
-        # A GET request displays the confirmation page.
-        context = {
-            "comment": comment,
-        }
+        # Assert: The comment still exists.
+        self.assertTrue(
+            Comment.objects.filter(
+                id=self.comment.id
+            ).exists()
+        )
 
-        return render(
-            request,
-            "events/comment_delete.html",
-            context
+    def test_non_author_cannot_delete_comment(self):
+        """
+        Test that another logged-in user cannot delete
+        a comment created by someone else.
+        """
+
+        # Arrange: Log in as a different user.
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Attempt to submit directly to the delete URL.
+        response = self.client.post(self.delete_url)
+
+        # Assert: The comment has not been deleted.
+        self.assertTrue(
+            Comment.objects.filter(
+                id=self.comment.id
+            ).exists()
+        )
+
+        # Assert: The user is redirected back to
+        # the event detail page.
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+
+    def test_logged_out_user_is_redirected_from_delete_comment(self):
+        """
+        Test that a logged-out user cannot access
+        the comment delete page.
+        """
+
+        # Act: Attempt to access the delete page
+        # without logging in.
+        response = self.client.get(self.delete_url)
+
+        # Assert: The user is redirected to the login page.
+        self.assertRedirects(
+            response,
+            f"{reverse('account_login')}?next={self.delete_url}"
+        )
+
+        # Assert: The comment still exists.
+        self.assertTrue(
+            Comment.objects.filter(
+                id=self.comment.id
+            ).exists()
         )
 #------------------------------------------------------------
 # FAVOURITE VIEW TESTS
