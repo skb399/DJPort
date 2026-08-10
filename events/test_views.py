@@ -2078,3 +2078,193 @@ class DJProfileDeleteViewTests(TestCase):
                 pk=self.dj_profile.pk
             ).exists()
         )
+        
+class FavouriteEventsViewTests(TestCase):
+    """
+    Tests for viewing a logged-in user's favourite events.
+    """
+
+    def setUp(self):
+        """
+        Create two users and published events for testing
+        the favourite events page.
+        """
+
+        # Arrange: Create the user whose favourites will be tested.
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Arrange: Create another user to ensure favourites
+        # belonging to different users are not displayed.
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Arrange: Create an event that will be favourited by the test user.
+        self.favourite_event = Event.objects.create(
+            creator=self.other_user,
+            title="Favourite Event",
+            slug="favourite-event",
+            description="An event saved as a favourite.",
+            venue="Favourite Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            status=1
+        )
+
+        # Arrange: Create another event that has not been favourited.
+        self.other_event = Event.objects.create(
+            creator=self.other_user,
+            title="Other Event",
+            slug="other-event",
+            description="An event that has not been favourited.",
+            venue="Other Venue",
+            location="London",
+            date=timezone.now(),
+            genre="Techno",
+            status=1
+        )
+
+        # Add only the first event to the user's favourites.
+        self.favourite_event.favourited_by.add(self.user)
+
+        # Store the URL for the favourite events page.
+        self.favourites_url = reverse("favourite_events")
+    
+    def test_logged_in_user_can_access_favourites_page(self):
+        """
+        Test that a logged-in user can access
+        the My Favourites page.
+        """
+
+        # Arrange: Log in as the test user, as the favourite_events view has @login_required decorator,
+        # which requires the user to be logged in to access the page.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the My Favourites page.
+        response = self.client.get(self.favourites_url)
+
+        # Assert: The page loads successfully and uses the correct template.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/favourite_events.html"
+        )
+    
+    def test_logged_out_user_is_redirected_from_favourites_page(self):
+        """
+        Test that a logged-out user cannot access
+        the My Favourites page.
+        """
+
+        # Act: Request the My Favourites page without logging in.
+        response = self.client.get(self.favourites_url)
+
+        # Assert: The user is redirected to the login page with the
+        # favourites URL stored in the next parameter.
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f"{reverse('account_login')}?next={self.favourites_url}"
+    )
+        
+    def test_favourites_page_displays_users_favourite_event(self):
+        """
+        Test that an event favourited by the logged-in user
+        is displayed on their My Favourites page.
+        """
+
+        # Arrange: Log in as the test user.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the My Favourites page.
+        response = self.client.get(self.favourites_url)
+
+        # Assert: The user's favourited event is displayed.
+        self.assertContains(
+            response,
+            "Favourite Event"
+        )
+        
+    def test_favourites_page_does_not_display_non_favourite_event(self):
+        """
+        Test that an event not favourited by the logged-in user
+        is not displayed on their My Favourites page.
+        """
+
+        # Arrange: Log in as the test user.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the My Favourites page.
+        response = self.client.get(self.favourites_url)
+
+        # Assert: The event that has not been favourited is not displayed.
+        self.assertNotContains(
+            response,
+            "Other Event"
+        )
+        
+    def test_favourites_page_shows_message_when_user_has_no_favourites(self):
+        """
+        Test that an appropriate message is displayed
+        when the logged-in user has no favourite events.
+        """
+
+        # Arrange: Remove the event from the user's favourites
+        # so that the user has no favourite events.
+        self.favourite_event.favourited_by.remove(self.user)
+
+        # Arrange: Log in as the test user.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the My Favourites page.
+        response = self.client.get(self.favourites_url)
+
+        # Assert: The empty favourites message is displayed.
+        self.assertContains(
+            response,
+            "You have not added any favourite events yet."
+        )
+    
+    def test_favourite_event_links_to_correct_detail_page(self):
+        """
+        Test that a favourited event links to its
+        corresponding event detail page.
+        """
+
+        # Arrange: Log in as the test user.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the My Favourites page.
+        response = self.client.get(self.favourites_url)
+
+        # Arrange: Build the expected detail URL for the favourited event.
+        expected_url = reverse(
+            "event_detail",
+            args=[self.favourite_event.slug]
+        )
+
+        # Assert: The response contains a link to the correct event detail page.
+        self.assertContains(
+            response,
+            f'href="{expected_url}"'
+        )
