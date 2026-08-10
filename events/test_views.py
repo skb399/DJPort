@@ -20,6 +20,7 @@ class EventListViewTests(TestCase):
             slug="published-event",
             description="A published event.",
             venue="Test Venue",
+            lineup="DJ Test",
             location="Manchester",
             date=timezone.now(),
             genre="House",
@@ -86,7 +87,149 @@ class EventListViewTests(TestCase):
         # Assert: Check that the response contains the message indicating no published events are available
         self.assertContains(response, "No published events are currently available.")
         self.assertNotContains(response, "Draft Event")
-                
+    # -------------------------------------------------
+    # Event Search Tests 
+    # --------------------------------------------------
+    def test_search_finds_event_by_title(self):
+        """
+        Test that searching by event title returns the matching published event.
+        """
+        # Act: Make a GET request to the event list view with a search query for the published event's title
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass the search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and the value being the title of the published event.
+            {"q": "Published"}
+        )
+        # Assert: Check that the response contains the published event's title, indicating that the search was successful
+        self.assertContains(response, "Published Event")
+
+
+    def test_search_finds_event_by_venue(self):
+        """
+        Test that searching by venue returns the matching published event.
+        """
+        # Act: Make a GET request to the event list view with a search query for the published event's venue
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass the search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and the value being the venue of the published event.
+            {"q": "Test Venue"}
+        )
+        # Assert: Check that the response contains the published event's title, indicating that the search was successful
+        self.assertContains(response, "Published Event")
+
+
+    def test_search_finds_event_by_location(self):
+        """
+        Test that searching by location returns the matching published event.
+        """
+        # Act: Make a GET request to the event list view with a search query for the published event's location
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass the search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and the value being the location of the published event.
+            {"q": "Manchester"}
+        )
+        # Assert: Check that the response contains the published event's title, indicating that the search was successful
+        self.assertContains(response, "Published Event")
+
+
+    def test_search_finds_event_by_genre(self):
+        """
+        Test that searching by genre returns the matching published event.
+        """
+        # Act: Make a GET request to the event list view with a search query for the published event's genre
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass the search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and the value being the genre of the published event.
+            {"q": "House"}
+        )
+        # Assert: Check that the response contains the published event's title, indicating that the search was successful
+        self.assertContains(response, "Published Event")
+        
+    def test_search_finds_event_by_lineup(self):
+            """
+            Test that searching by an artist in the lineup returns
+            the matching published event.
+            """
+            # Act: Search for an artist listed in the event lineup.
+            response = self.client.get(
+                reverse("event_list"),
+                {"q": "DJ Test"}
+            )
+    
+            # Assert: The matching published event is displayed.
+            self.assertContains(response, "Published Event")
+
+
+    def test_search_is_case_insensitive(self):
+        """
+        Test that event search is case-insensitive.
+        """
+        # Act: Make a GET request to the event list view with a search query in a different case than the published event's title
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass the search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and the value being the title of the published event in a different case.
+            {"q": "manchester"}
+        )
+        # Assert: Check that the response contains the published event's title, indicating that the search was successful and case-insensitive
+        self.assertContains(response, "Published Event")
+
+
+    def test_search_shows_message_when_no_events_match(self):
+        """
+        Test that a message is displayed when no published events
+        match the search query.
+        """
+        # Act: Make a GET request to the event list view with a search query that does not match any published events
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass the search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and the value is a string that does not match any published events.
+            {"q": "NoSuchEvent"}
+        )
+        # Assert: Check that the response contains the message indicating no events were found matching the search query
+        self.assertContains(
+            response,
+            'No events found matching "NoSuchEvent".'
+        )
+
+
+    def test_empty_search_shows_normal_event_list(self):
+        """
+        Test that an empty search displays the normal published event list.
+        """
+        # Act: Make a GET request to the event list view with an empty search query
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass an empty search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and an empty string as the value, simulating an empty search.
+            {"q": ""}
+        )
+        # Assert: Check that the response contains the published event's title and does not contain the draft event's title, 
+        # showing that the normal event list is displayed
+        self.assertContains(response, "Published Event")
+        self.assertNotContains(response, "Draft Event")
+    
+    def test_search_does_not_show_matching_draft_events(self):
+        """
+        Test that search results only contain published events,
+        even when a draft event matches the search query.
+        """
+        # Act: Make a GET request to the event list view with a search query that matches the draft event's location
+        response = self.client.get(
+            # Use reverse to get the URL for the event list view, and pass the search query as a GET parameter
+            reverse("event_list"),
+            # The search query is passed as a dictionary with the key "q" and the value being the location of the draft event.
+            {"q": "Bristol"}
+        )
+        # Assert: Check that the response does not contain the draft event's title, indicating that draft events are not 
+        # shown in search results
+        self.assertNotContains(response, "Draft Event")
+                        
     
 class EventDetailViewTests(TestCase):
     # Arrange: Set up test data for the EventDetailView tests
