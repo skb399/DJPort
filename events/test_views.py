@@ -1722,3 +1722,216 @@ class DJProfileEditViewTests(TestCase):
             "dj_name",
             "This field is required."
         )
+
+class DJProfileDeleteViewTests(TestCase):
+    """
+    Tests for deleting DJ profiles.
+    """
+
+    def setUp(self):
+        """
+        Create a DJ profile owner, another user, a DJ profile,
+        and store the relevant URLs.
+        """
+
+        # Arrange: Create a test user who owns the DJ profile and can delete it.
+        self.owner = User.objects.create_user(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Arrange: Create another test user who does not own the DJ profile,
+        # to test that only the owner can delete it.
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Arrange: Create a DJ profile owned by the first user, which will be
+        # used to test deletion.
+        self.dj_profile = DJProfile.objects.create(
+            owner=self.owner,
+            dj_name="DJ To Delete",
+            slug="dj-to-delete",
+            bio="A DJ profile used for deletion tests.",
+            genres="House",
+            location="Manchester"
+        )
+
+        # Store the URL for deleting the DJ profile using Django's reverse function,
+        # which allows us to refer to the URL by its name instead of hardcoding it.
+        self.delete_url = reverse(
+            "dj_profile_delete",
+            args=[self.dj_profile.slug]
+        )
+
+        # Store the URL for viewing the DJ profile detail page using Django's reverse function,
+        # which allows us to refer to the URL by its name instead of hardcoding it.
+        self.detail_url = reverse(
+            "dj_profile_detail",
+            args=[self.dj_profile.slug]
+        )
+
+    def test_owner_can_access_delete_confirmation_page(self):
+        """
+        Test that the DJ profile owner can access
+        the delete confirmation page.
+        """
+
+        # Arrange: Log in as the owner of the DJ profile.
+        self.client.login(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Act: Request the DJ profile delete confirmation page.
+        response = self.client.get(self.delete_url)
+
+        # Assert: The page loads successfully and uses the correct template.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/dj_profile_confirm_delete.html"
+        )
+
+    def test_get_request_does_not_delete_dj_profile(self):
+        """
+        Test that opening the delete confirmation page
+        does not delete the DJ profile. Deletion should
+        only occur after a POST request, where the user
+        confirms they want to delete the profile.
+        """
+
+        # Arrange: Log in as the owner of the DJ profile.
+        self.client.login(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Act: Request the delete confirmation page using GET.
+        response = self.client.get(self.delete_url)
+
+        # Assert: The confirmation page loads successfully.
+        self.assertEqual(response.status_code, 200)
+
+        # Assert: The DJ profile still exists in the database,
+        # proving that deletion only occurs after a POST request.
+        self.assertTrue(
+            DJProfile.objects.filter(
+                pk=self.dj_profile.pk
+            ).exists()
+        )
+
+    def test_owner_can_delete_dj_profile(self):
+        """
+        Test that the DJ profile owner can confirm deletion
+        and remove their profile from the database.
+        """
+
+        # Arrange: Log in as the owner of the DJ profile.
+        self.client.login(
+            username="djowner",
+            password="testpassword"
+        )
+
+        # Act: Submit the delete confirmation form using POST.
+        response = self.client.post(self.delete_url)
+
+        # Assert: The DJ profile has been deleted from the database,
+        # as the count of DJ profiles is now 0.
+        self.assertEqual(DJProfile.objects.count(), 0)
+
+        # Assert: The specific DJ profile no longer exists.
+        self.assertFalse(
+            DJProfile.objects.filter(
+                pk=self.dj_profile.pk
+            ).exists()
+        )
+
+        # Assert: The user is redirected to the DJ profile list page
+        # after successfully deleting their profile.
+        self.assertRedirects(
+            response,
+            reverse("dj_profile_list")
+        )
+
+    def test_non_owner_cannot_delete_dj_profile(self):
+        """
+        Test that a logged-in user cannot delete
+        another user's DJ profile.
+        """
+
+        # Arrange: Log in as a different user who does not own the DJ profile.
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Attempt to delete another user's DJ profile using POST.
+        response = self.client.post(self.delete_url)
+
+        # Assert: The DJ profile still exists in the database,
+        # proving that the non-owner was not allowed to delete it.
+        self.assertTrue(
+            DJProfile.objects.filter(
+                pk=self.dj_profile.pk
+            ).exists()
+        )
+
+        # Assert: The non-owner is redirected to the DJ profile detail page.
+        self.assertRedirects(
+            response,
+            self.detail_url
+        )
+
+    def test_logged_out_user_is_redirected_from_dj_profile_delete_page(self):
+        """
+        Test that a logged-out user cannot access
+        the DJ profile delete page.
+        """
+
+        # Act: Request the DJ profile delete page without logging in.
+        response = self.client.get(self.delete_url)
+
+        # Assert: The user is redirected to the login page with the delete
+        # URL stored in the next parameter.
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f"{reverse('account_login')}?next={self.delete_url}"
+        )
+
+        # Assert: The DJ profile still exists in the database.
+        self.assertTrue(
+            DJProfile.objects.filter(
+                pk=self.dj_profile.pk
+            ).exists()
+        )
+
+    def test_non_owner_cannot_access_delete_confirmation_page(self):
+        """
+        Test that a logged-in non-owner cannot access
+        another user's DJ profile delete confirmation page.
+        """
+
+        # Arrange: Log in as a different user who does not own the DJ profile.
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Attempt to open the delete confirmation page.
+        response = self.client.get(self.delete_url)
+
+        # Assert: The non-owner is redirected to the DJ profile detail page.
+        self.assertRedirects(
+            response,
+            self.detail_url
+        )
+
+        # Assert: The DJ profile still exists in the database.
+        self.assertTrue(
+            DJProfile.objects.filter(
+                pk=self.dj_profile.pk
+            ).exists()
+        )
