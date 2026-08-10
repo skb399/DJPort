@@ -437,12 +437,24 @@ def dj_profile_list(request):
     """
     # Retrieve all DJ profiles. Filter not required as DJ profiles don't have draft or published status
     dj_profiles = DJProfile.objects.all()
+    
+    # Get the search term from the URL query string.
+    search_query = request.GET.get("q")
+    
+    # If a search term has been entered, filter the DJ profiles.
+    if search_query:
+        dj_profiles = dj_profiles.filter(
+            Q(dj_name__icontains=search_query) |
+            Q(genres__icontains=search_query) |
+            Q(location__icontains=search_query)
+        )
 
     # Create a context dictionary to pass the DJ profiles to the template as Django needs 
     # a context dictionary to render the template with the DJ profiles data. Which the template
     # can iterate through to display the DJ profiles.
     context = {
         "dj_profiles": dj_profiles,
+        "search_query": search_query,
     }
 
     return render(request, "events/dj_profile_list.html", context)

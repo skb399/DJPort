@@ -15,6 +15,30 @@
     </a>
     {% endif %}
 
+    <!-- Search form for filtering DJ profiles by name, genre, or location -->
+    <form method="GET" action="{% url 'dj_profile_list' %}" class="mb-4">
+        <div class="input-group">
+            <input
+                type="search"
+                name="q"
+                class="form-control"
+                placeholder="Search DJs by name, genre or location..."
+                value="{{ search_query|default:'' }}"
+            >
+
+            <button type="submit" class="btn btn-primary">
+                Search
+            </button>
+        </div>
+    </form>
+    <!-- If there is a search query, display the search results -->
+    {% if search_query %}
+        <p>
+            Search results for:
+            <strong>{{ search_query }}</strong>
+        </p>
+    {% endif %}
+
     <div class="row">
         {% for profile in dj_profiles %}
             <div class="col-md-4 mb-4">
@@ -53,8 +77,18 @@
             </div>
 
         {% empty %}
-            <p>No DJ profiles are currently available.</p>
-        {% endfor %}
+
+        <div class="col-12">
+            {% if search_query %}
+            <!-- If search doesn't return any results, display a message -->
+                <p>No DJs found matching "{{ search_query }}".</p>
+            {% else %}
+            <!-- If there are no DJ profiles and no search query, display a different message -->
+                <p>No DJ profiles are currently available.</p>
+            {% endif %}
+        </div>
+
+    {% endfor %}
     </div>
 </div>
 
