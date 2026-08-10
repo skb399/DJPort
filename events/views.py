@@ -1,8 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
-# Comments not imported because they are not used in this file. The Comment model 
-# is only used in the add_comment view, which is already imported from the views module.
-from .models import Event, DJProfile
+from .models import Event, DJProfile, Comment
  
 from .forms import EventForm, CommentForm, DJProfileForm
 
@@ -118,6 +116,65 @@ def add_comment(request, slug):
     
     # Redirect the user back to the event detail page after submitting the comment.
     return redirect("event_detail", slug=event.slug)
+
+@login_required
+def edit_comment(request, comment_id):
+    """
+    Allow a logged-in user to edit their own comment.
+    """
+
+    # Retrieve the comment using its ID.
+    # If the comment does not exist, return a 404 error.
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Prevent users from editing comments that they do not own.
+    if comment.author != request.user:
+        return redirect(
+            "event_detail",
+            slug=comment.event.slug
+        )
+
+    # If the form has been submitted, bind the submitted data
+    # to the existing comment instance.
+    if request.method == "POST":
+        comment_form = CommentForm(
+            request.POST,
+            # Without instance=comment the form would create a new comment 
+            # instead of updating the existing one.
+            instance=comment
+        )
+
+        # If the submitted data is valid, update the existing comment.
+        if comment_form.is_valid():
+            comment_form.save()
+
+            messages.success(
+                request,
+                "Your comment has been updated successfully."
+            )
+
+            return redirect(
+                "event_detail",
+                slug=comment.event.slug
+            )
+
+    else:
+        # For a GET request, populate the form with the
+        # comment's existing content.
+        comment_form = CommentForm(
+            instance=comment
+        )
+
+    context = {
+        "comment_form": comment_form,
+        "comment": comment,
+    }
+
+    return render(
+        request,
+        "events/comment_edit.html",
+        context
+    )
 
 # Decorator "@login_required" to ensure that only logged-in users can access the toggle_favourite view.
 @login_required

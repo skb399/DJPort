@@ -65,6 +65,15 @@
 
                         <p>{{ comment.body }}</p>
                     </div>
+                    <!-- If the user is the author of the comment, display the edit button -->
+                    {% if user == comment.author %}
+                        <a
+                            href="{% url 'edit_comment' comment.id %}"
+                            class="btn btn-sm btn-outline-primary"
+                        >
+                            Edit Comment
+                        </a>
+                    {% endif %}
                 
                 <!-- If there are no comments, display a message -->
                 {% empty %}

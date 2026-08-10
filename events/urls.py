@@ -93,6 +93,14 @@ urlpatterns = [
      name="add_comment",
      ),
     
+    # Add a URL pattern for the edit comment view, which allows logged-in users to 
+    # edit their own comments on an event.
+    path(      
+    "comments/<int:comment_id>/edit/",
+    views.edit_comment,
+    name="edit_comment"
+     ),
+    
     path(
     # Define a URL pattern for the toggle favourite view    
     "events/<slug:slug>/favourite/",
