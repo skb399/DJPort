@@ -953,7 +953,10 @@ class EventDeleteViewTests(TestCase):
         self.assertTrue(
             Event.objects.filter(pk=self.event.pk).exists()
         )
-        
+# ------------------------------------------------------------
+# COMMENT VIEW TESTS
+# -----------------------------------------------------------    
+
 class CommentViewTests(TestCase):
     """
     Tests for displaying and submitting comments on events.
@@ -1139,7 +1142,225 @@ class CommentViewTests(TestCase):
             response,
             self.detail_url
         )
+
+class EditCommentViewTests(TestCase):
+    """
+    Tests for editing an existing comment.
+    """
+
+    def setUp(self):
+        """
+        Create users, an event and a comment for use in the tests.
+        """
+
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpassword"
+        )
+
+        self.other_user = User.objects.create_user(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        self.event = Event.objects.create(
+            creator=self.other_user,
+            title="Test Event",
+            slug="test-event",
+            description="A test event.",
+            venue="Test Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            status=1
+        )
+
+        self.comment = Comment.objects.create(
+            event=self.event,
+            author=self.user,
+            body="Original comment",
+            approved=True
+        )
+
+        self.edit_url = reverse(
+            "edit_comment",
+            args=[self.comment.id]
+        )
         
+    def test_comment_author_can_access_edit_page(self):
+        """
+        Test that the author of a comment can access
+        the comment edit page.
+        """
+
+        # Arrange: Log in as the comment author.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the comment edit page.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The page loads successfully and uses
+        # the correct template.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "events/comment_edit.html"
+        )
+
+    def test_edit_form_is_prefilled_with_existing_comment(self):
+        """
+        Test that the edit form is populated with
+        the comment's existing body text.
+        """
+
+        # Arrange: Log in as the comment author.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Request the comment edit page.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The form contains the existing comment body.
+        self.assertContains(
+            response,
+            "Original comment"
+        )
+        
+    def test_comment_author_can_update_comment(self):
+        """
+        Test that the comment author can update their existing comment.
+        """
+
+        # Arrange: Log in as the comment author.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Submit updated comment text.
+        response = self.client.post(
+            self.edit_url,
+            {
+                "body": "Updated comment"
+            }
+        )
+
+        # Refresh the comment so we have the latest data from the database.
+        self.comment.refresh_from_db()
+
+        # Assert: Check the existing comment has been updated.
+        self.assertEqual(
+            self.comment.body,
+            "Updated comment"
+        )
+
+        # Assert: Check that a new comment has not been created.
+        self.assertEqual(
+            Comment.objects.count(),
+            1
+        )
+
+        # Assert: Check that the user is redirected back to the event detail page.
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+        
+    def test_non_author_cannot_edit_comment(self):
+        """
+        Test that a logged-in user cannot edit a comment
+        created by another user.
+        """
+
+        # Arrange: Log in as a different user.
+        self.client.login(
+            username="otheruser",
+            password="testpassword"
+        )
+
+        # Act: Attempt to access the edit page.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The user is redirected back to the event detail page.
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+            )
+        )
+
+        # Assert: The comment has not been changed.
+        self.comment.refresh_from_db()
+        self.assertEqual(
+            self.comment.body,
+            "Original comment"
+        )
+        
+    def test_logged_out_user_is_redirected_from_edit_comment(self):
+        """
+        Test that a logged-out user cannot access
+        the comment edit page.
+        """
+
+        # Act: Attempt to access the edit page without logging in.
+        response = self.client.get(self.edit_url)
+
+        # Assert: The user is redirected to the login page.
+        self.assertRedirects(
+            response,
+            f"{reverse('account_login')}?next={self.edit_url}"
+        )
+        
+    def test_invalid_edit_does_not_update_comment(self):
+        """
+        Test that invalid form data does not update
+        the existing comment.
+        """
+
+        # Arrange: Log in as the comment author.
+        self.client.login(
+            username="testuser",
+            password="testpassword"
+        )
+
+        # Act: Submit an empty comment body.
+        response = self.client.post(
+            self.edit_url,
+            {
+                "body": ""
+            }
+        )
+
+        # Refresh the comment from the database.
+        self.comment.refresh_from_db()
+
+        # Assert: The original comment text remains unchanged.
+        self.assertEqual(
+            self.comment.body,
+            "Original comment"
+        )
+
+        # Assert: The edit page is returned with a form error.
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(
+            response.context["comment_form"],
+            "body",
+            "This field is required."
+        )
+        
+#------------------------------------------------------------
+# FAVOURITE VIEW TESTS
+#-----------------------------------------------------------
+    
 class FavouriteViewTests(TestCase):
     """
     Tests for adding and removing events from a user's favourites.
