@@ -2506,7 +2506,133 @@ class DJProfileDeleteViewTests(TestCase):
                 pk=self.dj_profile.pk
             ).exists()
         )
-        
+
+class DJProfileSearchTests(TestCase):
+    """
+    Tests for searching DJ profiles.
+    """
+
+    def setUp(self):
+        """
+        Create DJ profiles with different names,
+        genres and locations for search testing.
+        """
+
+        self.user_one = User.objects.create_user(
+            username="djone",
+            password="testpassword"
+        )
+
+        self.user_two = User.objects.create_user(
+            username="djtwo",
+            password="testpassword"
+        )
+        # Arrange: Create a DJ profile with the below attributes to test search function.
+        self.profile_one = DJProfile.objects.create(
+            owner=self.user_one,
+            dj_name="Neon Pulse",
+            slug="neon-pulse",
+            bio="Manchester house DJ.",
+            genres="House",
+            location="Manchester"
+        )
+        # Arrange: Create a second DJ profile with different attributes to test search function.
+        self.profile_two = DJProfile.objects.create(
+            owner=self.user_two,
+            dj_name="Bass Theory",
+            slug="bass-theory",
+            bio="Bristol techno DJ.",
+            genres="Techno",
+            location="Bristol"
+        )
+
+        self.list_url = reverse("dj_profile_list")
+    
+    def test_search_by_dj_name(self):
+        """
+        Test that DJ profiles can be searched by DJ name.
+        """
+
+        response = self.client.get(
+             self.list_url,
+            {"q": "Neon"}
+        )
+
+        self.assertContains(response, "Neon Pulse")
+        self.assertNotContains(response, "Bass Theory")
+
+
+    def test_search_by_genre(self):
+        """
+        Test that DJ profiles can be searched by genre.
+        """
+
+        response = self.client.get(
+            self.list_url,
+            {"q": "House"}
+        )
+
+        self.assertContains(response, "Neon Pulse")
+        self.assertNotContains(response, "Bass Theory")
+
+
+    def test_search_by_location(self):
+        """
+        Test that DJ profiles can be searched by location.
+        """
+
+        response = self.client.get(
+            self.list_url,
+            {"q": "Bristol"}
+        )
+
+        self.assertContains(response, "Bass Theory")
+        self.assertNotContains(response, "Neon Pulse")
+
+
+    def test_search_is_case_insensitive(self):
+        """
+        Test that DJ search is not case-sensitive.
+        """
+
+        response = self.client.get(
+            self.list_url,
+            {"q": "manchester"}
+        )
+
+        self.assertContains(response, "Neon Pulse")
+
+
+    def test_search_with_no_results_displays_message(self):
+        """
+        Test that an appropriate message is displayed
+        when no DJ profiles match the search query.
+        """
+
+        response = self.client.get(
+            self.list_url,
+            {"q": "Drum and Bass"}
+        )
+
+        self.assertContains(
+            response,
+            'No DJs found matching "Drum and Bass".'
+        )
+
+
+    def test_empty_search_displays_all_profiles(self):
+        """
+        Test that an empty search displays all DJ profiles.
+        """
+
+        response = self.client.get(
+            self.list_url,
+            {"q": ""}
+        )
+
+        self.assertContains(response, "Neon Pulse")
+        self.assertContains(response, "Bass Theory")
+      
 class FavouriteEventsViewTests(TestCase):
     """
     Tests for viewing a logged-in user's favourite events.
