@@ -1,19 +1,37 @@
 {% extends "base.html" %}
-
-{% block title %}
-Home | DJ Port
-{% endblock %}
+{% load static %}
 
 {% block content %}
 
-<div class="container py-5">
+<section class="hero-section text-center">
+    <div class="container">
 
-    <h1>Welcome to DJ Port</h1>
+        <img
+            src="{% static 'images/dj-port-logo.png' %}"
+            alt="DJ Port logo"
+            class="hero-logo"
+        >
 
-    <p>
-        Discover DJs and events.
-    </p>
+        <h1 class="display-4 fw-bold">
+            Discover Events. Find DJs. Connect with the Scene.
+        </h1>
 
-</div>
+        <p class="lead">
+            DJ Port brings together DJs, event organisers and music fans
+            in one place.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
+            <a href="{% url 'event_list' %}" class="btn btn-primary btn-lg">
+                Browse Events
+            </a>
+
+            <a href="{% url 'dj_profile_list' %}" class="btn btn-primary btn-lg">
+                Discover DJs
+            </a>
+        </div>
+
+    </div>
+</section>
 
 {% endblock %}

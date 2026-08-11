@@ -234,3 +234,50 @@ label {
 .alert-error {
     border-color: var(--danger);
 }
+
+<!--HOMEPAGE STYLING-->
+
+.hero-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    background:
+        radial-gradient(
+            circle at top,
+            rgba(155, 93, 229, 0.18),
+            transparent 45%
+        ),
+        var(--bg-dark);
+}
+
+.hero-logo {
+    width: min(280px, 80vw);
+    height: auto;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 18px rgba(155, 93, 229, 0.35));
+}
+
+.hero-section h1 {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-section .lead {
+    max-width: 650px;
+    margin: 1.5rem auto 0;
+    color: var(--text-muted);
+}
+
+.btn-outline-light {
+    color: var(--text-light);
+    border-color: var(--text-light);
+}
+
+.btn-outline-light:hover,
+.btn-outline-light:focus {
+    background-color: var(--green);
+    border-color: var(--green);
+    color: var(--bg-dark);
+}
