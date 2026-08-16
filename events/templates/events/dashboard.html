@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <h1 class="mb-4">My Dashboard</h1>
+
+    <section class="mb-5">
+        <h2 class="mb-3">My DJ Profile</h2>
+
+        <div class="card p-3">
+            {% if dj_profile %}
+                <h3 class="h5">{{ dj_profile.dj_name }}</h3>
+
+                <div class="mt-2">
+                    <a
+                        href="{% url 'dj_profile_detail' dj_profile.slug %}"
+                        class="btn btn-primary"
+                    >
+                        View Profile
+                    </a>
+
+                    <a
+                        href="{% url 'dj_profile_edit' dj_profile.slug %}"
+                        class="btn btn-secondary"
+                    >
+                        Edit Profile
+                    </a>
+                </div>
+            {% else %}
+                <p>You have not created a DJ profile yet.</p>
+
+                <a
+                    href="{% url 'dj_profile_create' %}"
+                    class="btn btn-primary"
+                >
+                    Create DJ Profile
+                </a>
+            {% endif %}
+        </div>
+    </section>
+
+
+    <section class="mb-5">
+        <h2 class="mb-3">My Events</h2>
+
+        <div class="row">
+            {% for event in user_events %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100 p-3">
+
+                        <h3 class="h5">
+                            {{ event.title }}
+                        </h3>
+
+                        <p>
+                            {{ event.date|date:"D d M Y, H:i" }}
+                        </p>
+                        <!-- Show whether the event is published or a draft, so user can easily see the status without opening the event -->
+                        <p>
+                            <strong>Status:</strong>
+                            {% if event.status == 1 %}
+                                Published
+                            {% else %}
+                                Draft
+                            {% endif %}
+                        </p>
+                        <div class="mt-auto">
+                            <a
+                                href="{% url 'event_detail' event.slug %}"
+                                class="btn btn-primary"
+                            >
+                                View
+                            </a>
+
+                            <a
+                                href="{% url 'event_edit' event.slug %}"
+                                class="btn btn-secondary"
+                            >
+                                Edit
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            {% empty %}
+                <p>You have not created any events yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+
+    <section class="mb-5">
+        <h2 class="mb-3">My Favourite Events</h2>
+
+        <div class="row">
+            {% for event in favourite_events %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100 p-3">
+
+                        <h3 class="h5">
+                            {{ event.title }}
+                        </h3>
+
+                        <a
+                            href="{% url 'event_detail' event.slug %}"
+                            class="btn btn-primary"
+                        >
+                            View Event
+                        </a>
+
+                    </div>
+                </div>
+
+            {% empty %}
+                <p>You have not favourited any events yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

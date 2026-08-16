@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-
 from .models import Event, Comment, DJProfile
 
 class EventListViewTests(TestCase):
@@ -2869,4 +2868,197 @@ class Custom404Tests(TestCase):
             response,
             reverse("home"),
             status_code=404
+        )
+   
+#-------------------------------------------------------------
+# DASHBOARD TESTS
+#-------------------------------------------------------------
+
+class DashboardTests(TestCase):
+    """
+    Tests for the logged-in user's dashboard.
+    """
+
+    def setUp(self):
+        """
+        Create users, DJ profiles and events for dashboard testing.
+        """
+
+        self.user_one = User.objects.create_user(
+            username="userone",
+            password="testpassword"
+        )
+
+        self.user_two = User.objects.create_user(
+            username="usertwo",
+            password="testpassword"
+        )
+
+        # Create a DJ profile belonging to user one.
+        self.profile_one = DJProfile.objects.create(
+            owner=self.user_one,
+            dj_name="DJ One",
+            slug="dj-one",
+            bio="Test DJ profile.",
+            genres="House",
+            location="Manchester"
+        )
+
+        # Create an event belonging to user one.
+        self.event_one = Event.objects.create(
+            creator=self.user_one,
+            title="User One Event",
+            slug="user-one-event",
+            description="An event created by user one.",
+            venue="Test Venue",
+            location="Manchester",
+            date=timezone.now(),
+            genre="House",
+            lineup="DJ One",
+            status=1
+        )
+
+        # Create an event belonging to user two.
+        self.event_two = Event.objects.create(
+            creator=self.user_two,
+            title="User Two Event",
+            slug="user-two-event",
+            description="An event created by user two.",
+            venue="Another Venue",
+            location="Bristol",
+            date=timezone.now(),
+            genre="Techno",
+            lineup="DJ Two",
+            status=1
+        )
+
+        self.dashboard_url = reverse("dashboard")
+
+
+    def test_logged_out_user_is_redirected_to_login(self):
+        """
+        Test that a logged-out user cannot access the dashboard.
+        """
+        # Act: Request the dashboard page without logging in.
+        response = self.client.get(self.dashboard_url)
+
+        # Assert: The user is redirected to the login page
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+
+    def test_user_sees_own_dj_profile(self):
+        """
+        Test that the logged-in user's DJ profile is displayed.
+        """
+        # Arrange: Log in as user one, who has a DJ profile.
+        self.client.login(
+            username="userone",
+            password="testpassword"
+        )
+        # Act: Request the dashboard page.
+        response = self.client.get(self.dashboard_url)
+        # Assert: The response contains the DJ name of the logged-in user's profile.
+        self.assertContains(response, "DJ One")
+
+
+    def test_user_sees_own_events(self):
+        """
+        Test that events created by the logged-in user are displayed.
+        """
+        # Arrange: Log in as user one, who has created an event.
+        self.client.login(
+            username="userone",
+            password="testpassword"
+        )
+        # Act: Request the dashboard page.
+        response = self.client.get(self.dashboard_url)
+
+        # Assert: The response contains the event created by the logged-in user.
+        self.assertContains(response, "User One Event")
+
+
+    def test_user_does_not_see_another_users_events(self):
+        """
+        Test that events created by another user are not displayed
+        in the My Events section.
+        """
+        # Arrange: Log in as user one, but the event belongs to user two.
+        self.client.login(
+            username="userone",
+            password="testpassword"
+        )
+        # Act: Request the dashboard page.
+        response = self.client.get(self.dashboard_url)
+
+        # Assert: The response does not contain the event created by another user.
+        self.assertNotContains(response, "User Two Event")
+
+
+    def test_user_sees_favourite_events(self):
+        """
+        Test that events favourited by the logged-in user are displayed.
+        """
+        # Arrange: Add the event created by user two to user one's favourites.
+        self.event_two.favourited_by.add(self.user_one)
+        # Arrange: Log in as user one
+        self.client.login(
+            username="userone",
+            password="testpassword"
+        )
+        # Act: Request the dashboard page.
+        response = self.client.get(self.dashboard_url)
+        # Assert: The response contains the event favourited by the logged-in user.
+        self.assertContains(response, "User Two Event")
+
+
+    def test_dashboard_loads_without_dj_profile(self):
+        """
+        Test that the dashboard still loads if the logged-in
+        user does not have a DJ profile.
+        """
+        # Arrange: Log in as user two, who does not have a DJ profile.
+        self.client.login(
+            username="usertwo",
+            password="testpassword"
+        )  
+        # Act: Request the dashboard page.
+        response = self.client.get(self.dashboard_url)
+        # Assert: The dashboard loads successfully and displays a message indicating that
+        # the user has not created a DJ profile yet.
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "You have not created a DJ profile yet."
+        )
+
+
+    def test_dashboard_loads_without_events_or_favourites(self):
+        """
+        Test that the dashboard still loads if the user
+        has no created events or favourite events.
+        """
+        # Arrange: Create a new user who has not created any events or favourited any events.
+        user_three = User.objects.create_user(
+            username="userthree",
+            password="testpassword"
+        )
+        # Arrange: Log in as the new user.
+        self.client.login(
+            username="userthree",
+            password="testpassword"
+        )
+        # Act: Request the dashboard page.
+        response = self.client.get(self.dashboard_url)
+        # Assert: The dashboard loads successfully
+        self.assertEqual(response.status_code, 200)
+        # Assert: The response contains the message indicating that the user has not created any events yet.
+        self.assertContains(
+            response,
+            "You have not created any events yet."
+        )
+        # Assert: The response contains the message indicating that the user has not favourited any events yet.
+        self.assertContains(
+            response,
+            "You have not favourited any events yet."
         )

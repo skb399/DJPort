@@ -29,12 +29,16 @@ def event_list(request):
     # Filter events to only include those with a status of 1 (Published)
     events = Event.objects.filter(status=1)
     
-    # If a search query is provided in the request, filter the events to only include those that match the query. 
-    # request.GET.get("q") pulls the value of the q query-string parameter submitted by the search form.
-    search_query = request.GET.get("q")
+    # Get the search query from the "q" query-string parameter submitted by the search form.
+    # If no query is provided, return an empty string so the search input remains blank
+    # and its placeholder text is displayed.
+    search_query = request.GET.get("q", "")
     if search_query:
         events = events.filter(
-            # icontains =  A lookup function that is not case-sensitive
+            # icontains =  A lookup function that is not case-sensitive. Searches for the 
+            # search_query in the title, venue, location, genre, and lineup fields of the 
+            # Event model, using OR ("|") to combine the conditions. This allows the user
+            # to find events that contain any of this information in their fields. 
             Q(title__icontains=search_query) |
             Q(venue__icontains=search_query) |
             Q(location__icontains=search_query) |
@@ -609,7 +613,40 @@ def favourite_events(request):
         "events/favourite_events.html",
         context
     )
-    
+
+@login_required
+def dashboard(request):
+    """
+    Display the logged-in user's dashboard.
+    """
+
+    # Retrieve the DJ profile owned by the logged-in user, if one exists. asks for the logged-in user's DJ profile. 
+    # We use .first() because they may not have created one yet, so instead of throwing a 404/error it gives us None. 
+    dj_profile = DJProfile.objects.filter(
+        owner=request.user
+    ).first()
+
+    # Retrieve all events created only by the logged-in user. There is no "status=1" inlcluded because this is a private
+    # dashboard and the user should be able to see their events even if they are not published.
+    user_events = Event.objects.filter(
+        creator=request.user
+    )
+
+    # Retrieve all events favourited by the logged-in user.
+    favourite_events = request.user.favourite_events.all()
+
+    context = {
+        "dj_profile": dj_profile,
+        "user_events": user_events,
+        "favourite_events": favourite_events,
+    }
+
+    return render(
+        request,
+        "events/dashboard.html",
+        context
+    )
+
 def custom_404(request, exception):
     """
     Display a custom 404 page when a requested page cannot be found.

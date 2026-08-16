@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Event Search form -->
+<form method="GET" action="{% url 'event_list' %}" class="mb-4">
+    <div class="input-group">
+        <input
+            type="search"
+            name="q"
+            class="form-control"
+            placeholder="Search events..."
+            value="{{ search_query }}"
+            aria-label="Search events"
+        >
+
+        <button class="btn btn-primary" type="submit">
+            Search
+        </button>
+    </div>
+</form>
 
 <!-- If there is a search query, display it -->
 {% if search_query %}

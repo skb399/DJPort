@@ -81,10 +81,12 @@
                             DJs
                         </a>
                     </li>
+                    <!-- Only logged-in users can access the dashboard and logout links, 
+                     while logged-out users can access the register and login links. -->
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'favourite_events' %}">
-                                My Favourites
+                            <a class="nav-link" href="{% url 'dashboard' %}">
+                                Dashboard
                             </a>
                         </li>                    
                         <li class="nav-item">

@@ -21,13 +21,30 @@ urlpatterns = [
         name="home"),
     
 # ---------------------------------------------------------------------------
+# DASHBOARD URL
+# ---------------------------------------------------------------------------
+
+# Add a URL pattern for the logged-in user's dashboard.
+path(
+    # Define the URL used to access the dashboard. Thje "dashboard/" string shows
+    # that this URL pattern matches the /dashboard/ URL path.
+    "dashboard/",
+
+    # The views.dashboard function is called when this URL pattern is matched.
+    views.dashboard,
+
+    # Give the URL pattern a name so it can be referenced
+    # in templates and views using Django's URL reversing.
+    name="dashboard",
+),
+
+# ---------------------------------------------------------------------------
 # EVENT URLS
 # ---------------------------------------------------------------------------
 
     # Add a URL pattern for the event list view, which displays all published events.
     path(
-         # Define the URL path used to access the event list view. The "events/" string shows that this URL pattern matches
-         # the /events/ URL path.
+         # Define the URL path used to access the event list view.
          "events/", 
          # The views.event_list function is called when this URL pattern is matched.
          views.event_list, 
