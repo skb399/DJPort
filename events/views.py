@@ -33,6 +33,7 @@ def event_list(request):
     # If no query is provided, return an empty string so the search input remains blank
     # and its placeholder text is displayed.
     search_query = request.GET.get("q", "")
+    
     if search_query:
         events = events.filter(
             # icontains =  A lookup function that is not case-sensitive. Searches for the 

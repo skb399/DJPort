@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-5">
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+
+                    <h1 class="text-center mb-4">Login</h1>
+
+                    <p class="text-center">
+                        Welcome back to DJPort.
+                    </p>
+                    <!--Submits form back to Django Allauth's login view -->
+                    <form method="POST" action="{% url 'account_login' %}">
+                        {% csrf_token %}
+                        <!-- Form still provided by Django Allauth -->
+                        {{ form.as_p }}
+
+                        {% if redirect_field_value %}
+                        <input
+                            type="hidden"
+                            name="{{ redirect_field_name }}"
+                            value="{{ redirect_field_value }}"
+                        >
+                        {% endif %}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                Login
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="text-center mt-4 mb-0">
+                        Don't have an account?
+                        <a href="{% url 'account_signup' %}">
+                            Sign up
+                        </a>
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
