@@ -281,3 +281,10 @@ label {
     border-color: var(--green);
     color: var(--bg-dark);
 }
+
+
+/*DASHBOARD STYLING*/
+
+.text-muted {
+    color: #b8b3c2 !important;
+}
