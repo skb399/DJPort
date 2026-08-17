@@ -1,180 +1,203 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block content %}
 
 <div class="container py-5">
+  <div class="text-center mb-5">
+    <h1 class="mb-2">My Dashboard</h1>
+    <p class="mb-0">Manage your DJ profile, events and favourites.</p>
+  </div>
 
-    <div class="text-center mb-5">
-        <h1 class="mb-2">My Dashboard</h1>
-        <p class="mb-0">
-            Manage your DJ profile, events and favourites.
-        </p>
-    </div>
+  <!-- DJ Profile -->
+  <!-- DJ Profile -->
+  <section class="mb-5">
+    <h2 class="h3 mb-3">My DJ Profile</h2>
 
-    <!-- DJ Profile -->
-    <section class="mb-5">
-        <h2 class="h3 mb-3">My DJ Profile</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          {% if dj_profile %} {% if dj_profile.image %}
+          <img
+            src="{{ dj_profile.image.url }}"
+            class="card-img-top dj-card-image"
+            alt="{{ dj_profile.dj_name }}"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/djport_dj_placeholder_image.webp' %}"
+            class="card-img-top dj-card-image"
+            alt="Placeholder DJ profile image"
+          />
+          {% endif %}
 
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
+          <div class="card-body">
+            <h3 class="card-title h4 text-center mb-3">
+              {{ dj_profile.dj_name }}
+            </h3>
 
-                {% if dj_profile %}
-                    <h3 class="h5 mb-3">
-                        {{ dj_profile.dj_name }}
-                    </h3>
+            <p class="card-text">
+              <strong>Genres:</strong>
+              {{ dj_profile.genres }}
+            </p>
 
-                    <div class="d-flex flex-wrap gap-2">
-                        <a
-                            href="{% url 'dj_profile_detail' dj_profile.slug %}"
-                            class="btn btn-primary"
-                        >
-                            View Profile
-                        </a>
+            <p class="card-text">
+              <strong>Location:</strong>
+              {{ dj_profile.location }}
+            </p>
 
-                        <a
-                            href="{% url 'dj_profile_edit' dj_profile.slug %}"
-                            class="btn btn-outline-light"
-                        >
-                            Edit Profile
-                        </a>
-                    </div>
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+              <a
+                href="{% url 'dj_profile_detail' dj_profile.slug %}"
+                class="btn btn-primary"
+              >
+                View Profile
+              </a>
 
-                {% else %}
-                    <p>
-                        You have not created a DJ profile yet.
-                    </p>
-
-                    <a
-                        href="{% url 'dj_profile_create' %}"
-                        class="btn btn-primary"
-                    >
-                        Create DJ Profile
-                    </a>
-                {% endif %}
-
+              <a
+                href="{% url 'dj_profile_edit' dj_profile.slug %}"
+                class="btn btn-outline-light"
+              >
+                Edit Profile
+              </a>
             </div>
+          </div>
+
+          {% else %}
+
+          <div class="card-body text-center">
+            <p>You have not created a DJ profile yet.</p>
+
+            <a href="{% url 'dj_profile_create' %}" class="btn btn-primary">
+              Create DJ Profile
+            </a>
+          </div>
+
+          {% endif %}
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
+  <!-- User Events -->
+  <section class="mb-5">
+    <h2 class="h3 mb-3">My Events</h2>
 
-    <!-- User Events -->
-    <section class="mb-5">
-        <h2 class="h3 mb-3">My Events</h2>
+    <div class="row g-4">
+      {% for event in user_events %}
 
-        <div class="row g-4">
-            {% for event in user_events %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          {% if event.featured_image %}
+          <img
+            src="{{ event.featured_image.url }}"
+            class="card-img-top event-card-image"
+            alt="{{ event.title }}"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/djport_event_placeholder_image.webp' %}"
+            class="card-img-top event-card-image"
+            alt="Placeholder event image"
+          />
+          {% endif %}
+          <div class="card-body d-flex flex-column p-4">
+            <h3 class="h5 mb-3">{{ event.title }}</h3>
 
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column p-4">
+            <p class="mb-4">{{ event.date|date:"D d M Y, H:i" }}</p>
 
-                            <h3 class="h5 mb-3">
-                                {{ event.title }}
-                            </h3>
+            <p class="mb-4">
+              <strong>Status:</strong>
 
-                            <p class="mb-4">
-                                {{ event.date|date:"D d M Y, H:i" }}
-                            </p>
+              {% if event.status == 1 %}
+              <span class="badge text-bg-success"> Published </span>
+              {% else %}
+              <span class="badge text-bg-secondary"> Draft </span>
+              {% endif %}
+            </p>
 
-                            <p class="mb-4">
-                                <strong>Status:</strong>
+            <div class="d-flex gap-2 mt-auto">
+              <a
+                href="{% url 'event_detail' event.slug %}"
+                class="btn btn-primary"
+              >
+                View
+              </a>
 
-                                {% if event.status == 1 %}
-                                    <span class="badge text-bg-success">
-                                        Published
-                                    </span>
-                                {% else %}
-                                    <span class="badge text-bg-secondary">
-                                        Draft
-                                    </span>
-                                {% endif %}
-                            </p>
-
-                            <div class="d-flex gap-2 mt-auto">
-                                <a
-                                    href="{% url 'event_detail' event.slug %}"
-                                    class="btn btn-primary"
-                                >
-                                    View
-                                </a>
-
-                                <a
-                                    href="{% url 'event_edit' event.slug %}"
-                                    class="btn btn-outline-light"
-                                >
-                                    Edit
-                                </a>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-            {% empty %}
-
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-body p-4">
-                            <p class="mb-0">
-                                You have not created any events yet.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-            {% endfor %}
+              <a
+                href="{% url 'event_edit' event.slug %}"
+                class="btn btn-outline-light"
+              >
+                Edit
+              </a>
+            </div>
+          </div>
         </div>
-    </section>
+      </div>
 
+      {% empty %}
 
-    <!-- Favourite Events -->
-    <section class="mb-5">
-        <h2 class="h3 mb-3">My Favourite Events</h2>
-
-        <div class="row g-4">
-            {% for event in favourite_events %}
-
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column p-4">
-
-                            <h3 class="h5 mb-3">
-                                {{ event.title }}
-                            </h3>
-
-                            <p class="mb-4">
-                                {{ event.date|date:"D d M Y, H:i" }}
-                            </p>
-
-                            <div class="mt-auto">
-                                <a
-                                    href="{% url 'event_detail' event.slug %}"
-                                    class="btn btn-primary"
-                                >
-                                    View Event
-                                </a>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-            {% empty %}
-
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-body p-4">
-                            <p class="mb-0">
-                                You have not favourited any events yet.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-            {% endfor %}
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <p class="mb-0">You have not created any events yet.</p>
+          </div>
         </div>
-    </section>
+      </div>
 
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Favourite Events -->
+  <section class="mb-5">
+    <h2 class="h3 mb-3">My Favourite Events</h2>
+
+    <div class="row g-4">
+      {% for event in favourite_events %}
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          {% if event.featured_image %}
+          <img
+            src="{{ event.featured_image.url }}"
+            class="card-img-top event-card-image"
+            alt="{{ event.title }}"
+          />
+          {% else %}
+          <img
+            src="{% static 'images/djport_event_placeholder_image.webp' %}"
+            class="card-img-top event-card-image"
+            alt="Placeholder event image"
+          />
+          {% endif %}
+          <div class="card-body d-flex flex-column p-4">
+            <h3 class="h5 mb-3">{{ event.title }}</h3>
+
+            <p class="mb-4">{{ event.date|date:"D d M Y, H:i" }}</p>
+
+            <div class="mt-auto">
+              <a
+                href="{% url 'event_detail' event.slug %}"
+                class="btn btn-primary"
+              >
+                View Event
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% empty %}
+
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <p class="mb-0">You have not favourited any events yet.</p>
+          </div>
+        </div>
+      </div>
+
+      {% endfor %}
+    </div>
+  </section>
 </div>
 
 {% endblock %}

@@ -1,87 +1,88 @@
-{% extends "base.html" %}
-
+{% extends "base.html" %} 
+{% load static %}
 {% block content %}
 
-<div class="container py-5">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
+<div class="container dj-detail-container">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card">
+        <div class="card-body p-4">
+          <h1 class="text-center mb-4">{{ dj_profile.dj_name }}</h1>
 
-            <h1>{{ dj_profile.dj_name }}</h1>
+          {% if dj_profile.image %}
+          <img
+            src="{{ dj_profile.image.url }}"
+            alt="{{ dj_profile.dj_name }}"
+            class="dj-detail-image mb-4"
+          />
+          {% else %}
+            <img
+                src="{% static 'images/djport_dj_placeholder_image.webp' %}"
+                alt="Placeholder DJ profile image"
+                class="dj-detail-image mb-4"
+            />
+          {% endif %}
 
-            {% if dj_profile.image %}
-                <img
-                    src="{{ dj_profile.image.url }}"
-                    alt="{{ dj_profile.dj_name }}"
-                    class="img-fluid mb-4"
-                >
-            {% endif %}
+          <p>
+            <strong>Genres:</strong>
+            {{ dj_profile.genres }}
+          </p>
 
-            <p>
-                <strong>Genres:</strong>
-                {{ dj_profile.genres }}
-            </p>
+          <p>
+            <strong>Location:</strong>
+            {{ dj_profile.location }}
+          </p>
 
-            <p>
-                <strong>Location:</strong>
-                {{ dj_profile.location }}
-            </p>
+          <p>
+            <strong>Bio:</strong>
+            {{ dj_profile.bio }}
+          </p>
 
-            <p>
-                <strong>Bio:</strong>
-                {{ dj_profile.bio }}
-            </p>
-
-            {% if dj_profile.website %}
-                <p>
-                    <strong>Website:</strong>
-                    <a
-                        href="{{ dj_profile.website }}"
-                        target="_blank"
-                    >
-                        {{ dj_profile.website }}
-                    </a>
-                </p>
-            {% endif %}
-
-            {% if dj_profile.social_media %}
-                <p>
-                    <strong>Social Media:</strong>
-                    <a
-                        href="{{ dj_profile.social_media }}"
-                        target="_blank"
-                    >
-                        {{ dj_profile.social_media }}
-                    </a>
-                </p>
-            {% endif %}
-            
-            <!-- If the logged-in user is the owner of the DJ profile, show the edit button -->
-            {% if user == dj_profile.owner %}
-            <div class="text-center mt-4">
-
-            <a href="{% url 'dj_profile_edit' dj_profile.slug %}"
-                    class="btn btn-primary">
-                    Edit Profile
+          {% if dj_profile.website %}
+          <p>
+            <strong>Website:</strong>
+            <a href="{{ dj_profile.website }}" target="_blank">
+              {{ dj_profile.website }}
             </a>
-
-            <a href="{% url 'dj_profile_delete' dj_profile.slug %}"
-                class="btn btn-danger">
-                Delete Profile
+          </p>
+          {% endif %} 
+          {% if dj_profile.social_media %}
+          <p>
+            <strong>Social Media:</strong>
+            <a href="{{ dj_profile.social_media }}" target="_blank">
+              {{ dj_profile.social_media }}
             </a>
-            
-            {% endif %}
+          </p>
+          {% endif %}
 
-            <div class="text-center mt-4">
+          <!-- If the logged-in user is the owner of the DJ profile, show the edit button -->
+          {% if user == dj_profile.owner %}
+          <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
             <a
-                href="{% url 'dj_profile_list' %}"
-                class="btn btn-secondary"
+              href="{% url 'dj_profile_edit' dj_profile.slug %}"
+              class="btn btn-primary"
             >
-                Back to DJ Profiles
+              Edit Profile
             </a>
 
-            </div>
-        </div>
-    </div>
-</div>
+            <a
+              href="{% url 'dj_profile_delete' dj_profile.slug %}"
+              class="btn btn-danger"
+            >
+              Delete Profile
+            </a>
+          </div>
 
+          {% endif %}
+
+          <div class="text-center mt-4">
+            <a href="{% url 'dj_profile_list' %}" class="btn btn-outline-light">
+              Back to DJ Profiles
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

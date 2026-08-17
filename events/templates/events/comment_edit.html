@@ -1,33 +1,32 @@
-{% extends "base.html" %}
-{% load crispy_forms_tags %}
+{% extends "base.html" %} {% load crispy_forms_tags %} {% block content %}
 
-{% block content %}
+<div class="container comment-form-container">
+  <div class="row">
+    <div class="col-md-8 col-lg-6 mx-auto">
+      <div class="card">
+        <div class="card-body p-4">
+          <h1 class="text-center mb-4">Edit Comment</h1>
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+          <form method="POST">
+            {% csrf_token %} {{ comment_form|crispy }}
 
-            <h2>Edit Comment</h2>
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+              <button type="submit" class="btn btn-primary">
+                Save Changes
+              </button>
 
-            <form method="POST">
-                {% csrf_token %}
-
-                {{ comment_form|crispy }}
-
-                <button type="submit" class="btn btn-primary">
-                    Save Changes
-                </button>
-
-                <a
-                    href="{% url 'event_detail' comment.event.slug %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-            </form>
-
+              <a
+                href="{% url 'event_detail' comment.event.slug %}"
+                class="btn btn-outline-light"
+              >
+                Cancel
+              </a>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endblock %}

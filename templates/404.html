@@ -4,12 +4,12 @@
 <!--Custom 404 page will not show while debug is set to true during development as the user will see Django's default 404 page-->
 {% block content %}
 
-<div class="container text-center mt-5">
+<div class="container error-page">
     <h1>404</h1>
     <h2>Page Not Found</h2>
-    <img src="{% static 'images/404-cat.webp' %}" alt="404 Cat Error Image" class="img-fluid my-4" style="max-width: 300px;">
+    <img src="{% static 'images/404_cat.webp' %}" alt="404 Cat Error Image" class="img-fluid my-4" style="max-width: 300px;">
     <p>
-        Sorry, the page you are looking for does not exist.
+        <strong>Sorry, the page you are looking for does not exist.</strong>
     </p>
 
     <a href="{% url 'home' %}" class="btn btn-primary">

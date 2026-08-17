@@ -1,26 +1,41 @@
-{% extends "base.html" %}
-{% load crispy_forms_tags %}
+{% extends "base.html" %} {% load crispy_forms_tags %} {% block content %}
 
-{% block content %}
-
-<div class="container py-5">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <h1>Create Event</h1>
-            <!-- enctype="multipart/form-data" is required for file uploads (images) -->
-            <form method="POST" enctype="multipart/form-data">
-                <!-- CSRF token for security to prevent cross-site request forgery attacks -->
-                {% csrf_token %}
-                <!-- Render all form fields automatically, with each field wrapped in a 
-                 <p> tag USING Django's form.as_p method -->
-                {{ form|crispy }}
-
-                <button type="submit" class="btn btn-primary">
+<div class="container event-form-container">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card">
+        <div class="card-body p-4">
+          <h1 class="text-center mb-4">
+            <!-- If statement checks if the form instance has a primary key (pk) to determine if it's an edit or create form
+             in order to display the correct heading -->
+            {% if form.instance.pk %}
+                Edit Event 
+            {% else %}
+                Create Event 
+            {% endif %}
+          </h1>
+          <!-- enctype="multipart/form-data" is required for file uploads (images) -->
+          <form method="POST" enctype="multipart/form-data">
+            <!-- CSRF token for security to prevent cross-site request forgery attacks -->
+            {% csrf_token %}
+            <!-- Render the event form using Django Crispy Forms -->
+            {{ form|crispy }}
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-primary">
+                <!-- If statement checks if the form instance has a primary key (pk) to determine if it's an edit or create form
+                 in order to display the correct button text -->
+                {% if form.instance.pk %} 
+                    Update Event 
+                {% else %} 
                     Create Event
-                </button>
-            </form>
+                {% endif %}
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endblock %}

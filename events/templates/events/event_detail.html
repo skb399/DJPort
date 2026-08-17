@@ -1,107 +1,57 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block content %}
 
-<div class="container py-5">
+<div class="container event-detail-container">
     <div class="row">
         <div class="col-12">
-            <h1>{{ event.title }}</h1>
-            <p><strong>Creator:</strong> {{ event.creator }}</p>
-            <!-- Display the event date in a readable format -->
-            <p><strong>Date:</strong> {{ event.date|date:"D d M Y, H:i" }}</p>
-            <p><strong>Venue:</strong> {{ event.venue }}</p>
-            <p><strong>Location:</strong> {{ event.location }}</p>
-            <p><strong>Genre:</strong> {{ event.genre }}</p>
-            <p><strong>Description:</strong> {{ event.description }}</p>
-            <!-- Display the lineup if it exists -->
-            {% if event.lineup %}
-                <p><strong>Lineup:</strong> {{ event.lineup }}</p>
-            {% endif %}
-            <!-- Display the featured image if it exists-->
-            {% if event.featured_image %}
-                <img
-                    src="{{ event.featured_image.url }}"
-                    alt="{{ event.title }}"
-                    class="img-fluid mt-3"
-                >
-            <!-- If no featured image is available, display a placeholder image -->
-            {% else %}
-                <img
-                    src="{% static 'images/djport_event_placeholder_image.png' %}"
-                    alt="Placeholder event image (no image available)"
-                    class="img-fluid mt-3"
-                >
-            {% endif %}
-
-            <!-- Comment Section-->
-            <section class="mt-5">
-                <h2>Comments</h2>
-                <!-- If the user is authenticated, display the comment form -->
-                {% if user.is_authenticated %}
-                    <form method="POST" action="{% url 'add_comment' event.slug %}">
-                    <!-- Include the CSRF token for security -->
-                        {% csrf_token %}
-                    <!-- Render the comment form fields as paragraphs -->
-                    {{ comment_form.as_p }}
-                    <button type="submit" class="btn btn-primary">
-                        Submit
-                    </button>
-                </form>
-                {% else %}
-                    <!-- Else, if the user is not authenticated, prompt them to log in to comment -->
-                    <p>
-                        <a href="{% url 'account_login' %}">Log in</a> to add a comment.
-                    </p>
-                {% endif %}
-                
-                <!-- Display all approved comments for this event -->
-                {% for comment in comments %}
-                    <div class="mb-3">
-                        <p>
-                            <strong>{{ comment.author }}</strong>
-                            <small>{{ comment.created_on|date:"D d M Y, H:i" }}</small>
-                        </p>
-
-                        <p>{{ comment.body }}</p>
-                    </div>
-                    <!-- If the user is the author of the comment, display the edit button -->
-                    {% if user == comment.author %}
-                        <a
-                            href="{% url 'edit_comment' comment.id %}"
-                            class="btn btn-sm btn-outline-primary"
-                        >
-                            Edit Comment
-                        </a>
-
-                        <a
-                            href="{% url 'delete_comment' comment.id %}"
-                            class="btn btn-sm btn-outline-danger"
-                        >
-                            Delete Comment
-                        </a>
+            <div class="card event-detail-card">
+                <div class="card-body p-4">
+                    <h1 class="text-center mb-4">{{ event.title }}</h1>
+                    <p><strong>Creator:</strong> {{ event.creator }}</p>
+                    <!-- Display the event date in a readable format -->
+                    <p><strong>Date:</strong> {{ event.date|date:"D d M Y, H:i" }}</p>
+                    <p><strong>Venue:</strong> {{ event.venue }}</p>
+                    <p><strong>Location:</strong> {{ event.location }}</p>
+                    <p><strong>Genre:</strong> {{ event.genre }}</p>
+                    <p><strong>Description:</strong> {{ event.description }}</p>
+                    <!-- Display the lineup if it exists -->
+                    {% if event.lineup %}
+                        <p><strong>Lineup:</strong> {{ event.lineup }}</p>
                     {% endif %}
-                
-                <!-- If there are no comments, display a message -->
-                {% empty %}
-                    <p>No comments yet.</p>
-                {% endfor %}
-            </section>
-            
+                    <!-- Display the featured image if it exists-->
+                    {% if event.featured_image %}
+                        <img
+                            src="{{ event.featured_image.url }}"
+                            alt="{{ event.title }}"
+                            class="event-detail-image mt-4"
+                        >
+                    <!-- If no featured image is available, display a placeholder image -->
+                    {% else %}
+                        <img
+                            src="{% static 'images/djport_event_placeholder_image.webp' %}"
+                            alt="Placeholder event image (no image available)"
+                            class="event-detail-image mt-4"
+                        >
+                    {% endif %}
+             </div>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
             <!-- If the user is the creator of the event display the edit button, if not the 
              button is hidden, adding a layer of security so users cannot edit events they 
              did not create. -->
             {% if user == event.creator %}
+            
                 <a
                     href="{% url 'event_edit' event.slug %}"
-                    class="btn btn-primary mt-3"
+                    class="btn btn-primary"
                 >
                     Edit Event
                 </a>
                 <!--Similar to the edit button, the delete button is only visible to the creator of the event -->
                 <a
                     href="{% url 'event_delete' event.slug %}"
-                    class="btn btn-danger mt-3"
+                    class="btn btn-danger"
                 >
                     Delete Event
                 </a>
@@ -116,20 +66,82 @@
                     {% csrf_token %}
 
                     {% if is_favourited %}
-                        <button type="submit" class="btn btn-outline-danger mt-3">
+                        <button type="submit" class="btn btn-outline-danger">
                             <i class="fas fa-heart"></i>
                             Remove from Favourites
                         </button>
                     {% else %}
-                        <button type="submit" class="btn btn-outline-secondary mt-3">
+                        <button type="submit" class="btn btn-outline-light">
                             <i class="far fa-heart"></i>
                             Add to Favourites
                         </button>
                     {% endif %}
                 </form>
             {% endif %}
+            </div>
+            <!-- Comment Section-->
+            <section class="mt-5 mb-4">
+                <h2 class="text-center mb-4">Comments</h2>
+                <!-- If the user is authenticated, display the comment form -->
+                {% if user.is_authenticated %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'add_comment' event.slug %}">
+                            <!-- Include the CSRF token for security -->
+                            {% csrf_token %}
+                            <!-- Render the comment form fields as paragraphs -->
+                            {{ comment_form.as_p }}
+                            <button type="submit" class="btn btn-primary">
+                                Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                    <!-- Else, if the user is not authenticated, prompt them to log in to comment -->
+                    <p>
+                        <a href="{% url 'account_login' %}">Log in</a> to add a comment.
+                    </p>
+                {% endif %}
+                
+                <!-- Display all approved comments for this event -->
+                {% for comment in comments %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>{{ comment.author }}</strong>
+                                <small class="ms-1">
+                                    {{ comment.created_on|date:"D d M Y, H:i" }}
+                                </small>
+                            </p>
+                            <p>{{ comment.body }}</p>
+                    <!-- If the user is the author of the comment, display the edit button -->
+                            {% if user == comment.author %}
+                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                    <a
+                                        href="{% url 'edit_comment' comment.id %}"
+                                        class="btn btn-sm btn-outline-light"
+                                    >
+                                        Edit Comment
+                                    </a>
+                                    <a
+                                        href="{% url 'delete_comment' comment.id %}"
+                                        class="btn btn-sm btn-outline-danger"
+                                    >
+                                        Delete Comment
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>   
+                <!-- If there are no comments, display a message -->
+                {% empty %}
+                    <p class="text-center">No comments yet.</p>
+                {% endfor %}
+            </section>
+            </div>
         </div>
     </div>
 </div>
-
 {% endblock %}

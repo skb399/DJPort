@@ -1,106 +1,104 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="container event-list-container">
+  <div class="text-center mb-4">
+    <h1>Events</h1>
+    <p>Discover upcoming DJ events and club nights.</p>
+  </div>
 
-{% block content %}
-<!-- Event Search form -->
-<form method="GET" action="{% url 'event_list' %}" class="mb-4">
+  <!-- Event Search form -->
+  <form method="GET" action="{% url 'event_list' %}" class="mb-4">
     <div class="input-group">
-        <input
-            type="search"
-            name="q"
-            class="form-control"
-            placeholder="Search events..."
-            value="{{ search_query }}"
-            aria-label="Search events"
-        >
+      <input
+        type="search"
+        name="q"
+        class="form-control"
+        placeholder="Search events..."
+        value="{{ search_query }}"
+        aria-label="Search events"
+      />
 
-        <button class="btn btn-primary" type="submit">
-            Search
-        </button>
+      <button class="btn btn-primary" type="submit">Search</button>
     </div>
-</form>
+  </form>
 
-<!-- If there is a search query, display it -->
-{% if search_query %}
-    <p>
-        Search results for:
-        <strong>{{ search_query }}</strong>
-    </p>
-{% endif %}
+  <!-- If there is a search query, display it -->
+  {% if search_query %}
+  <p class="mb-4">
+    Search results for:
+    <strong>{{ search_query }}</strong>
+  </p>
+  {% endif %}
 
-<div class="row">
-
+  <div class="row g-4">
     {% for event in events %}
 
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        {% if event.featured_image %}
+        <img
+          src="{{ event.featured_image.url }}"
+          class="card-img-top event-card-image"
+          alt="{{ event.title }}"
+        />
+        {% else %}
+        <img
+          src="{% static 'images/djport_event_placeholder_image.webp' %}"
+          class="card-img-top event-card-image"
+          alt="Placeholder event image"
+        />
+        {% endif %}
 
-                    {% if event.featured_image %}
-                        <img
-                            src="{{ event.featured_image.url }}"
-                            class="card-img-top"
-                            alt="{{ event.title }}"
-                        >
-                    {% endif %}
+        <div class="card-body d-flex flex-column">
+          <h2 class="card-title h4 text-center mb-3">{{ event.title }}</h2>
 
-                    <div class="card-body">
+          <p class="card-text">
+            <strong>Date:</strong>
+            {{ event.date|date:"D d M Y, H:i" }}
+          </p>
 
-                    <h2 class="card-title h4">
-                        {{ event.title }}
-                    </h2>
+          <p class="card-text">
+            <strong>Venue:</strong>
+            {{ event.venue }}
+          </p>
 
-                    <p class="card-text">
-                        <strong>Date:</strong>
-                        {{ event.date|date:"D d M Y, H:i" }}
-                    </p>
+          <p class="card-text">
+            <strong>Location:</strong>
+            {{ event.location }}
+          </p>
 
-                    <p class="card-text">
-                        <strong>Venue:</strong>
-                        {{ event.venue }}
-                    </p>
+          <p class="card-text">
+            <strong>Genre:</strong>
+            {{ event.genre }}
+          </p>
 
-                    <p class="card-text">
-                        <strong>Location:</strong>
-                        {{ event.location }}
-                    </p>
-
-                    <p class="card-text">
-                        <strong>Genre:</strong>
-                        {{ event.genre }}
-                    </p>
-
-                    <p class="card-text">
-                        <!-- Crop the description to 25 words for better display -->
-                        {{ event.description|truncatewords:25 }}
-                    </p>
-
-                    <a
-                        href="{% url 'event_detail' event.slug %}"
-                        class="btn btn-primary"
-                    >
-                        View Details
-                    </a>
-
-                </div>
-            </div>
+          <p class="card-text">
+            <!-- Crop the description to 25 words for better display -->
+            {{ event.description|truncatewords:25 }}
+          </p>
+          <div class="mt-auto text-center">
+            <a
+              href="{% url 'event_detail' event.slug %}"
+              class="btn btn-primary"
+            >
+              View Details
+            </a>
+          </div>
         </div>
+      </div>
+    </div>
 
     <!-- Add a message if there are no matching events -->
     {% empty %}
 
-        <div class="col-12">
-            {% if search_query %}
-                <p>
-                    No events found matching "{{ search_query }}".
-                </p>
-            {% else %}
-                <p>
-                    No published events are currently available.
-                </p>
-            {% endif %}
-        </div>
-
+    <div class="col-12">
+      {% if search_query %}
+      <p>No events found matching "{{ search_query }}".</p>
+      {% else %}
+      <p>No published events are currently available.</p>
+      {% endif %}
+    </div>
     {% endfor %}
-
+  </div>
 </div>
 
 {% endblock %}

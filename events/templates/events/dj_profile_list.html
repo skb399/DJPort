@@ -1,95 +1,92 @@
-{% extends "base.html" %}
-
+{% extends "base.html" %} 
+{% load static %} 
 {% block content %}
 
-<div class="container py-5">
+<div class="container dj-list-container">
+  <div class="text-center mb-4">
     <h1>DJ Profiles</h1>
-    
-    <!-- If the user is authenticated, display a button to create a new DJ profile -->
-    {% if user.is_authenticated %}
-    <a
-        href="{% url 'dj_profile_create' %}"
-        class="btn btn-primary mb-4"
-    >
-        Create DJ Profile
+    <p>Discover DJs by name, genre or location.</p>
+  </div>
+
+  <!-- If the user is authenticated, display a button to create a new DJ profile -->
+  {% if user.is_authenticated %}
+  <div class="text-center mb-4">
+    <a href="{% url 'dj_profile_create' %}" class="btn btn-primary">
+      Create DJ Profile
     </a>
-    {% endif %}
+  </div>
+  {% endif %}
 
-    <!-- Search form for filtering DJ profiles by name, genre, or location -->
-    <form method="GET" action="{% url 'dj_profile_list' %}" class="mb-4">
-        <div class="input-group">
-            <input
-                type="search"
-                name="q"
-                class="form-control"
-                placeholder="Search DJs by name, genre or location..."
-                value="{{ search_query|default:'' }}"
+  <!-- Search form for filtering DJ profiles by name, genre, or location -->
+  <form method="GET" action="{% url 'dj_profile_list' %}" class="mb-4">
+    <div class="input-group">
+      <input
+        type="search"
+        name="q"
+        class="form-control"
+        placeholder="Search DJs by name, genre or location..."
+        value="{{ search_query|default:'' }}"
+      />
+
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+  <!-- If there is a search query, display the search results -->
+  {% if search_query %}
+  <p>
+    Search results for:
+    <strong>{{ search_query }}</strong>
+  </p>
+  {% endif %}
+
+  <div class="row g-4">
+    {% for profile in dj_profiles %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        {% if profile.image %}
+            <img
+            src="{{ profile.image.url }}"
+            class="card-img-top dj-card-image"
+            alt="{{ profile.dj_name }}"
+            />
+        {% else %}
+            <img
+                src="{% static 'images/djport_dj_placeholder_image.webp' %}"
+                class="card-img-top dj-card-image"
+                alt="Placeholder DJ profile image"
+            />
+        {% endif %}
+
+        <div class="card-body">
+          <h2 class="card-title h4 text-center mb-3">{{ profile.dj_name }}</h2>
+          <p class="card-text"><strong>Genres:</strong> {{ profile.genres }}</p>
+          <p class="card-text"><strong>Location:</strong> {{ profile.location }}</p>
+          <div class="text-center mt-4">
+            <a
+              href="{% url 'dj_profile_detail' profile.slug %}"
+              class="btn btn-primary"
             >
-
-            <button type="submit" class="btn btn-primary">
-                Search
-            </button>
+              View Profile
+            </a>
+          </div>
         </div>
-    </form>
-    <!-- If there is a search query, display the search results -->
-    {% if search_query %}
-        <p>
-            Search results for:
-            <strong>{{ search_query }}</strong>
-        </p>
-    {% endif %}
+      </div>
+    </div>
 
-    <div class="row">
-        {% for profile in dj_profiles %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
+    {% empty %}
 
-                    {% if profile.image %}
-                        <img
-                            src="{{ profile.image.url }}"
-                            class="card-img-top"
-                            alt="{{ profile.dj_name }}"
-                        >
-                    {% endif %}
-
-                    <div class="card-body">
-                        <h2 class="card-title">
-                            {{ profile.dj_name }}
-                        </h2>
-                        <div class="text-center">
-                            <a
-                                href="{% url 'dj_profile_detail' profile.slug %}"
-                                class="btn btn-primary"
-                            >
-                                View Profile
-                            </a>
-                        </div>
-                        <p class="card-text">
-                            Genres: {{ profile.genres }}
-                        </p>
-
-                        <p class="card-text">
-                            Location: {{ profile.location }}
-                        </p>
-                    </div>
-
-                </div>
-            </div>
-
-        {% empty %}
-
-        <div class="col-12">
-            {% if search_query %}
-            <!-- If search doesn't return any results, display a message -->
-                <p>No DJs found matching "{{ search_query }}".</p>
-            {% else %}
-            <!-- If there are no DJ profiles and no search query, display a different message -->
-                <p>No DJ profiles are currently available.</p>
-            {% endif %}
-        </div>
+    <div class="col-12">
+      {% if search_query %}
+      <!-- If search doesn't return any results, display a message -->
+      <p>No DJs found matching "{{ search_query }}".</p>
+      {% else %}
+      <!-- If there are no DJ profiles and no search query, display a different message -->
+      <p>No DJ profiles are currently available.</p>
+      {% endif %}
+    </div>
 
     {% endfor %}
-    </div>
+  </div>
 </div>
 
 {% endblock %}
