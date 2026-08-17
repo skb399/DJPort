@@ -124,6 +124,19 @@
             </li>
             {% endif %}
           </ul>
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <span class="nav-link nav-user">
+                        Logged in as {{ user.username }}
+                    </span>
+                </li>
+            {% else %}
+            <li class="nav-item">
+                <span class="nav-link nav-user">
+                    Not logged in
+                </span>
+            </li>
+            {% endif %}
         </div>
       </div>
     </nav>
@@ -167,11 +180,8 @@
 
     <!-- Main content -->
     <main class="flex-shrink-0">
-      {% if user.is_authenticated %}
-      <p class="text-end m-3">You are logged in as {{ user.username }}</p>
-      {% else %}
-      <p class="text-end m-3">You are not logged in</p>
-      {% endif %} {% block content %} {% endblock content %}
+        {% block content %}
+        {% endblock content %}
     </main>
 
   
