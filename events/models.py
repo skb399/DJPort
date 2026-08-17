@@ -62,16 +62,42 @@ event was created and last updated.
     def __str__(self):
         return self.title
     
-    # The save method is overridden to automatically generate a slug from the event title before 
-    # saving the event instance to the database. So that each event has a unique identifier based
-    # on its title.
+    # The save method is overridden to automatically generate a unique slug
+    # from the event title before the event is saved to the database.
+    # If another event already uses the same slug, a number is added
+    # to the end of the slug to keep each event URL unique.
     def save(self, *args, **kwargs):
         """
-        Generate a slug from the event title before saving.
+        Generate a unique slug from the event title before saving.
         """
-        if not self.slug:
-            self.slug = slugify(self.title)
 
+        # Only generate a slug if the event does not already have one.
+        # This prevents the slug and URL from changing when an existing
+        # event is edited.
+        if not self.slug:
+
+            # Convert the event title into a URL-friendly slug.
+            # For example: "Summer Rave" becomes "summer-rave".
+            base_slug = slugify(self.title)
+
+            # First try using the basic slug without a number.
+            slug = base_slug
+
+            # Start the duplicate counter at 2.
+            # If "summer-rave" already exists, the next slug will be
+            # "summer-rave-2", then "summer-rave-3", and so on.
+            counter = 2
+
+            # Check whether the slug already exists in the database.
+            # Keep generating a new numbered slug until a unique one is found.
+            while Event.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            # Save the unique slug to the event instance.
+            self.slug = slug
+
+        # Call Django's normal save method to save the event to the database.
         super().save(*args, **kwargs)
 
 class DJProfile(models.Model):
@@ -148,17 +174,43 @@ class DJProfile(models.Model):
     def __str__(self):
         return self.dj_name
 
-    # The save method is overridden to automatically generate a slug from the DJ's name before saving the
-    # DJProfile instance to the database. This ensures that each DJ profile has a unique identifier.
+    # The save method is overridden to automatically generate a unique slug
+    # from the DJ name before the profile is saved to the database.
+    # If another DJ profile already uses the same slug, a number is added
+    # to the end of the slug to keep each DJ profile URL unique.
     def save(self, *args, **kwargs):
         """
-        Generate a slug from the DJ name before saving.
+        Generate a unique slug from the DJ name before saving.
         """
-        # If the slug field is empty, generate a slug from the dj_name field using the slugify function.
-        if not self.slug:
-            self.slug = slugify(self.dj_name)
 
-        # Call the parent class's save method to save the DJProfile instance to the database.
+        # Only generate a slug if the DJ profile does not already have one.
+        # This prevents the slug and URL from changing when an existing
+        # DJ profile is edited.
+        if not self.slug:
+
+            # Convert the DJ name into a URL-friendly slug.
+            # For example: "DJ Pulse" becomes "dj-pulse".
+            base_slug = slugify(self.dj_name)
+
+            # First try using the basic slug without a number.
+            slug = base_slug
+
+            # Start the duplicate counter at 2.
+            # If "dj-pulse" already exists, the next slug will be
+            # "dj-pulse-2", then "dj-pulse-3", and so on.
+            counter = 2
+
+            # Check whether the slug already exists in the database.
+            # Keep generating a new numbered slug until a unique one is found.
+            while DJProfile.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            # Save the unique slug to the DJ profile instance.
+            self.slug = slug
+
+        # Call Django's normal save method to save the DJ profile
+        # to the database.
         super().save(*args, **kwargs)
         
 class Comment(models.Model):

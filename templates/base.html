@@ -1,23 +1,28 @@
 {% load static %} 
+
 {% url 'home' as home_url %} 
+
 {% url 'account_login' as login_url %} 
+
 {% url 'account_signup' as signup_url %} 
+
 {% url 'account_logout' as logout_url %}
 
 <!doctype html>
+
 <html class="h-100" lang="en">
   <head>
     <title>{% block title %}DJ Port{% endblock %}</title>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
+
     <!--Favicon-->
     <link
-    rel="icon"
-    type="image/png"
-    href="{% static 'images/djport_favicon.png' %}"
-    >
+      rel="icon"
+      type="image/png"
+      href="{% static 'images/djport_favicon.png' %}"
+    />
 
     <!-- Font Awesome CSS -->
     <link
@@ -84,11 +89,6 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'event_create' %}">
-                <strong>Create Event</strong>
-              </a>
-            </li>
-            <li class="nav-item">
               <a class="nav-link" href="{% url 'dj_profile_list' %}">
                 <strong>DJs</strong>
               </a>
@@ -96,6 +96,11 @@
             <!-- Only logged-in users can access the dashboard, favourites, and logout links, 
                      while logged-out users can access the register and login links. -->
             {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'event_create' %}">
+                <strong>Create Event</strong>
+              </a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'dashboard' %}">
                 <strong>Dashboard</strong>
@@ -124,19 +129,13 @@
             </li>
             {% endif %}
           </ul>
-            {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <span class="nav-link nav-user">
-                        Logged in as {{ user.username }}
-                    </span>
-                </li>
-            {% else %}
-            <li class="nav-item">
-                <span class="nav-link nav-user">
-                    Not logged in
-                </span>
-            </li>
-            {% endif %}
+          {% if user.is_authenticated %}
+          <span class="nav-link nav-user">
+            Logged in as {{ user.username }}
+          </span>
+          {% else %}
+          <span class="nav-link nav-user"> Not logged in </span>
+          {% endif %}
         </div>
       </div>
     </nav>
@@ -180,54 +179,52 @@
 
     <!-- Main content -->
     <main class="flex-shrink-0">
-        {% block content %}
-        {% endblock content %}
+      {% block content %} {% endblock content %}
     </main>
 
-  
-   <!-- Footer -->
+    <!-- Footer -->
     <footer class="site-footer mt-auto">
-        <p class="footer-brand text-center">&copy; 2026 DJ Port</p>
+      <p class="footer-brand text-center">&copy; 2026 DJ Port</p>
 
-        <div class="footer-socials">
-            <span><strong>Follow us:</strong></span>
+      <div class="footer-socials">
+        <span><strong>Follow us:</strong></span>
 
-            <a
-                href="https://www.facebook.com/"
-                target="_blank"
-                rel="noopener"
-                aria-label="Visit DJ Port on Facebook"
-            >
-                <i class="fab fa-facebook-square"></i>
-            </a>
+        <a
+          href="https://www.facebook.com/"
+          target="_blank"
+          rel="noopener"
+          aria-label="Visit DJ Port on Facebook"
+        >
+          <i class="fab fa-facebook-square"></i>
+        </a>
 
-            <a
-                href="https://twitter.com/"
-                target="_blank"
-                rel="noopener"
-                aria-label="Visit DJ Port on Twitter"
-            >
-                <i class="fab fa-twitter-square"></i>
-            </a>
+        <a
+          href="https://twitter.com/"
+          target="_blank"
+          rel="noopener"
+          aria-label="Visit DJ Port on Twitter"
+        >
+          <i class="fab fa-twitter-square"></i>
+        </a>
 
-            <a
-                href="https://www.instagram.com/"
-                target="_blank"
-                rel="noopener"
-                aria-label="Visit DJ Port on Instagram"
-            >
-                <i class="fab fa-instagram-square"></i>
-            </a>
+        <a
+          href="https://www.instagram.com/"
+          target="_blank"
+          rel="noopener"
+          aria-label="Visit DJ Port on Instagram"
+        >
+          <i class="fab fa-instagram-square"></i>
+        </a>
 
-            <a
-                href="https://www.youtube.com/"
-                target="_blank"
-                rel="noopener"
-                aria-label="Visit DJ Port on YouTube"
-            >
-                <i class="fab fa-youtube-square"></i>
-            </a>
-        </div>
+        <a
+          href="https://www.youtube.com/"
+          target="_blank"
+          rel="noopener"
+          aria-label="Visit DJ Port on YouTube"
+        >
+          <i class="fab fa-youtube-square"></i>
+        </a>
+      </div>
     </footer>
 
     <!-- Bootstrap JavaScript -->
