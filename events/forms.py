@@ -97,3 +97,17 @@ class DJProfileForm(forms.ModelForm):
             "website",
             "social_media",
         ]
+    # These widgets add URL examples as placeholders to show users
+    # the expected format for website and social media links.
+        widgets = {
+        "website": forms.URLInput(
+            attrs={
+                "placeholder": "https://example.com",
+            }
+        ),
+        "social_media": forms.URLInput(
+            attrs={
+                "placeholder": "https://instagram.com/yourprofile",
+            }
+        ),
+    }
