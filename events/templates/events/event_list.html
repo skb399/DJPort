@@ -15,7 +15,7 @@
         placeholder="Search events..."
         value="{{ search_query }}"
         aria-label="Search events"
-      />
+      >
 
       <button class="btn btn-primary" type="submit">Search</button>
     </div>
@@ -39,13 +39,13 @@
           src="{{ event.featured_image.url }}"
           class="card-img-top event-card-image"
           alt="{{ event.title }}"
-        />
+        >
         {% else %}
         <img
           src="{% static 'images/djport_event_placeholder_image.webp' %}"
           class="card-img-top event-card-image"
           alt="Placeholder event image"
-        />
+        >
         {% endif %}
 
         <div class="card-body d-flex flex-column">

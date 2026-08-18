@@ -26,7 +26,7 @@
         class="form-control"
         placeholder="Search DJs by name, genre or location..."
         value="{{ search_query|default:'' }}"
-      />
+      >
 
       <button type="submit" class="btn btn-primary">Search</button>
     </div>
@@ -48,13 +48,13 @@
             src="{{ profile.image.url }}"
             class="card-img-top dj-card-image"
             alt="{{ profile.dj_name }}"
-            />
+            >
         {% else %}
             <img
                 src="{% static 'images/djport_dj_placeholder_image.webp' %}"
                 class="card-img-top dj-card-image"
                 alt="Placeholder DJ profile image"
-            />
+            >
         {% endif %}
 
         <div class="card-body">

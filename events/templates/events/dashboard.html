@@ -19,13 +19,13 @@
             src="{{ dj_profile.image.url }}"
             class="card-img-top dj-card-image"
             alt="{{ dj_profile.dj_name }}"
-          />
+          >
           {% else %}
           <img
             src="{% static 'images/djport_dj_placeholder_image.webp' %}"
             class="card-img-top dj-card-image"
             alt="Placeholder DJ profile image"
-          />
+          >
           {% endif %}
 
           <div class="card-body">
@@ -90,13 +90,13 @@
             src="{{ event.featured_image.url }}"
             class="card-img-top event-card-image"
             alt="{{ event.title }}"
-          />
+          >
           {% else %}
           <img
             src="{% static 'images/djport_event_placeholder_image.webp' %}"
             class="card-img-top event-card-image"
             alt="Placeholder event image"
-          />
+          >
           {% endif %}
           <div class="card-body d-flex flex-column p-4">
             <h3 class="h5 mb-3">{{ event.title }}</h3>
@@ -160,13 +160,13 @@
             src="{{ event.featured_image.url }}"
             class="card-img-top event-card-image"
             alt="{{ event.title }}"
-          />
+          >
           {% else %}
           <img
             src="{% static 'images/djport_event_placeholder_image.webp' %}"
             class="card-img-top event-card-image"
             alt="Placeholder event image"
-          />
+          >
           {% endif %}
           <div class="card-body d-flex flex-column p-4">
             <h3 class="h5 mb-3">{{ event.title }}</h3>

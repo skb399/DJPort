@@ -14,30 +14,27 @@
   <head>
     <title>{% block title %}DJ Port{% endblock %}</title>
 
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!--Favicon-->
     <link
       rel="icon"
       type="image/png"
-      href="{% static 'images/djport_favicon.png' %}"
-    />
+      href="{% static 'images/djport_favicon.png' %}">
 
     <!-- Font Awesome CSS -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-    />
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+      rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
   </head>
 
   <body class="d-flex flex-column h-100">
@@ -53,7 +50,7 @@
             src="{% static 'images/dj_port_navbar_logo.webp' %}"
             alt="DJ Port logo"
             class="navbar-logo"
-          />
+          >
         </a>
 
         <button
@@ -143,16 +140,16 @@
     <!-- Hero section -->
     <!-- The hero section is displayed on all pages except the home page -->
     {% if request.path != home_url %}
-    <section class="site-hero">
+    <div class="site-hero">
       <div class="container text-center">
         <img
           src="{% static 'images/dj_port_logo.webp' %}"
           alt="DJ Port logo"
           class="site-hero-logo mb-2"
-        />
+        >
         <p class="mb-0"><strong>Discover DJs and live events</strong></p>
       </div>
-    </section>
+    </div>
     {% endif %}
     <!-- Django messages -->
     <div class="container">

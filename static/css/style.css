@@ -260,6 +260,16 @@ label {
     border-color: var(--purple);
 }
 
+.form-text {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.form-text ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    padding-left: 1.25rem;
+}
 
 /* ==================================================
    ALERTS

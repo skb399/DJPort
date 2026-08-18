@@ -1,5 +1,7 @@
-{% extends "base.html" %} 
-{% load static %}
+{% extends "base.html" %}
+
+{% load static %} 
+
 {% block content %}
 
 <div class="container dj-detail-container">
@@ -16,11 +18,11 @@
             class="dj-detail-image mb-4"
           />
           {% else %}
-            <img
-                src="{% static 'images/djport_dj_placeholder_image.webp' %}"
-                alt="Placeholder DJ profile image"
-                class="dj-detail-image mb-4"
-            />
+          <img
+            src="{% static 'images/djport_dj_placeholder_image.webp' %}"
+            alt="Placeholder DJ profile image"
+            class="dj-detail-image mb-4"
+          >
           {% endif %}
 
           <p>
@@ -46,6 +48,7 @@
             </a>
           </p>
           {% endif %} 
+          
           {% if dj_profile.social_media %}
           <p>
             <strong>Social Media:</strong>
