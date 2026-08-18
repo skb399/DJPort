@@ -16,12 +16,28 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Comment',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                    )
+                 ),
                 ('body', models.TextField()),
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('approved', models.BooleanField(default=False)),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='event_comments', to=settings.AUTH_USER_MODEL)),
-                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='events.event')),
+                ('author', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='event_comments',
+                    to=settings.AUTH_USER_MODEL
+                    )
+                 ),
+                ('event', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='comments',
+                    to='events.event'
+                    )
+                 ),
             ],
             options={
                 'ordering': ['-created_on'],

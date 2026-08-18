@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='event',
             name='featured_image',
-            field=cloudinary.models.CloudinaryField(blank=True, max_length=255, null=True, verbose_name='image'),
+            field=cloudinary.models.CloudinaryField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name='image'),
         ),
     ]

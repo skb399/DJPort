@@ -17,23 +17,42 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='event',
             name='status',
-            field=models.IntegerField(choices=[(0, 'Draft'), (1, 'Published')], default=1),
+            field=models.IntegerField(
+                choices=[(0, 'Draft'),
+                         (1, 'Published')],
+                default=1),
         ),
         migrations.CreateModel(
             name='DJProfile',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                    )
+                 ),
                 ('dj_name', models.CharField(max_length=100)),
                 ('slug', models.SlugField(max_length=100, unique=True)),
                 ('bio', models.TextField()),
                 ('genres', models.CharField(max_length=200)),
                 ('location', models.CharField(max_length=100)),
-                ('image', cloudinary.models.CloudinaryField(blank=True, max_length=255, null=True, verbose_name='image')),
+                ('image', cloudinary.models.CloudinaryField(
+                    blank=True,
+                    max_length=255,
+                    null=True,
+                    verbose_name='image'
+                    )
+                 ),
                 ('website', models.URLField(blank=True)),
                 ('social_media', models.URLField(blank=True)),
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('updated_on', models.DateTimeField(auto_now=True)),
-                ('owner', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='dj_profile', to=settings.AUTH_USER_MODEL)),
+                ('owner', models.OneToOneField(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='dj_profile',
+                    to=settings.AUTH_USER_MODEL)
+                 ),
             ],
             options={
                 'ordering': ['dj_name'],

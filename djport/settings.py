@@ -13,8 +13,9 @@ import os
 from pathlib import Path
 import sys
 
-# Import dj_database_url to parse the database URL from environment variables for heroku deployment. 
-# This allows the application to use a database configuration provided by Heroku.
+# Import dj_database_url to parse the database URL from environment variables
+# for heroku deployment. # This allows the application to use a
+# database configuration provided by Heroku.
 import dj_database_url
 
 if os.path.isfile("env.py"):
@@ -23,7 +24,8 @@ if os.path.isfile("env.py"):
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Path to templates directory - this is where the HTML templates will be stored 
+# Path to templates directory - this is where the HTML templates will be
+# stored
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 
@@ -33,8 +35,9 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production! DEBUG SHOULD BE SET TO FALSE FOR HEROKU DEPLOYMENT. 
-# This is because DEBUG mode can expose sensitive information about the application.
+# SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG SHOULD BE SET TO FALSE FOR HEROKU DEPLOYMENT. This is because DEBUG
+# mode can expose sensitive information about the application.
 DEBUG = True
 
 ALLOWED_HOSTS = [
@@ -54,7 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "cloudinary_storage",
-    'django.contrib.sites',    
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -62,7 +65,7 @@ INSTALLED_APPS = [
     "events",
     "crispy_forms",
     "crispy_bootstrap5",
-    
+
 ]
 
 SITE_ID = 1
@@ -160,7 +163,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"),]
 
-# The directory where static files will be collected when running the 
+# The directory where static files will be collected when running the
 # 'collectstatic' command for heroku deployment
 STATIC_ROOT = BASE_DIR / "staticfiles"
 

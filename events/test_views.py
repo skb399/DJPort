@@ -589,63 +589,6 @@ class EventEditViewTests(TestCase):
 
     def test_event_owner_can_update_event(self):
         """
-        Test that the event owner can submit valid data
-        and update the existing event.
-        """
-        # Arrange: Log in as the event owner
-        self.client.login(username="eventowner", password="testpassword")
-
-        # Arrange: Prepare updated form data - the post data must include all
-        # required fields, and the date must be in the future to be valid.
-        updated_form_data = {
-            "title": "Updated Event",
-            "description": "This event has been updated.",
-            "venue": "Updated Venue",
-            "location": "Liverpool",
-            "date": "2026-08-20T21:00",
-            "genre": "Techno",
-            "lineup": "Updated DJ",
-        }
-
-        # Act: Submit the updated data
-        response = self.client.post(self.edit_url, data=updated_form_data)
-
-        # Assert: Editing did not create a second event
-        self.assertEqual(Event.objects.count(), 1)
-
-        # Reload the event with its latest database values. The slug may
-        # change when the title changes, so we need to refresh the event
-        # instance to get the updated slug and other fields from the database.
-        # refresh_from_db() is a method provided by Django's model instances
-        # that reloads the instance's data from the database, so that any
-        # changes made to the instance in the database are reflected in the
-        # instance in memory. This is important after an update operation, as
-        # Django still has the old values stored in self.event until we
-        # refresh from the database.
-        self.event.refresh_from_db()
-
-        # Assert: The original event now contains the updated data
-        self.assertEqual(self.event.title, "Updated Event")
-        self.assertEqual(
-            self.event.description,
-            "This event has been updated."
-            )
-        self.assertEqual(self.event.venue, "Updated Venue")
-        self.assertEqual(self.event.location, "Liverpool")
-        self.assertEqual(self.event.genre, "Techno")
-        self.assertEqual(self.event.lineup, "Updated DJ")
-
-        # Assert: The user is redirected to the event detail page
-        self.assertRedirects(
-            response,
-            reverse(
-                "event_detail",
-                args=[self.event.slug]
-                )
-            )
-
-    def test_event_owner_can_update_event(self):
-        """
         Test that the event owner can update an existing event.
         """
         # Arrange: Log in as the owner
@@ -2804,8 +2747,9 @@ class DashboardTests(TestCase):
         """
         # Arrange: Create a new user who has not created any events or
         # favourited any events.
-        user_three = User.objects.create_user(
-            username="userthree", password="testpassword"
+        User.objects.create_user(
+            username="userthree",
+            password="testpassword"
         )
         # Arrange: Log in as the new user.
         self.client.login(username="userthree", password="testpassword")
