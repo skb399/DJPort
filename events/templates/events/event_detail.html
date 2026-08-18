@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% load cloudinary %}
+
 {% block content %}
 
 <div class="container event-detail-container">
@@ -23,11 +25,8 @@
           {% endif %}
           <!-- Display the featured image if it exists-->
           {% if event.featured_image %}
-          <img
-            src="{{ event.featured_image.url }}"
-            alt="{{ event.title }}"
-            class="event-detail-image mt-4"
-          >
+          <!-- Optimise the Cloudinary image size and format to improve page loading performance -->
+          {% cloudinary event.featured_image width=800 height=600 crop="fill" quality="auto" fetch_format="auto" class="event-detail-image mt-4" alt=event.title %}
           <!-- If no featured image is available, display a placeholder image -->
           {% else %}
           <img
