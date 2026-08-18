@@ -1,5 +1,9 @@
-{% extends "base.html" %} 
-{% load static %} 
+{% extends "base.html" %}
+
+{% load static %}
+
+{% load cloudinary %}
+
 {% block content %}
 
 <div class="container dj-list-container">
@@ -44,11 +48,8 @@
     <div class="col-md-6 col-lg-4">
       <div class="card h-100">
         {% if profile.image %}
-            <img
-            src="{{ profile.image.url }}"
-            class="card-img-top dj-card-image"
-            alt="{{ profile.dj_name }}"
-            >
+        <!-- Optimise the Cloudinary image size and format to improve page loading performance -->
+        {% cloudinary profile.image width=600 height=600 crop="fill" quality="auto" fetch_format="auto" class="card-img-top dj-card-image" alt=profile.dj_name %}
         {% else %}
             <img
                 src="{% static 'images/djport_dj_placeholder_image.webp' %}"

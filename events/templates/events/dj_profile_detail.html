@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
-{% load static %} 
+{% load static %}
+
+{% load cloudinary %}
 
 {% block content %}
 
@@ -12,11 +14,8 @@
           <h1 class="text-center mb-4">{{ dj_profile.dj_name }}</h1>
 
           {% if dj_profile.image %}
-          <img
-            src="{{ dj_profile.image.url }}"
-            alt="{{ dj_profile.dj_name }}"
-            class="dj-detail-image mb-4"
-          />
+          <!-- Optimise the Cloudinary image size and format to improve page loading performance -->
+          {% cloudinary dj_profile.image width=600 height=600 crop="fill" quality="auto" fetch_format="auto" class="dj-detail-image mb-4" alt=dj_profile.dj_name %}
           {% else %}
           <img
             src="{% static 'images/djport_dj_placeholder_image.webp' %}"
