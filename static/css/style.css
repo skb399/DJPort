@@ -9,6 +9,7 @@
 
     --purple: #9B5DE5;
     --purple-light: #C77DFF;
+    --purple-button: #8C4DD5;
     --green: #B6FF4A;
 
     --text-light: #F5F3F7;
@@ -16,6 +17,7 @@
 
     --border: #443A55;
     --danger: #FF6B6B;
+
 }
 
 
@@ -131,8 +133,8 @@ a:hover {
    ================================================== */
 
 .btn-primary {
-    background-color: var(--purple);
-    border-color: var(--purple);
+    background-color: var(--purple-button);
+    border-color: var(--purple-button);
     color: #fff;
     font-weight: 600;
 }
