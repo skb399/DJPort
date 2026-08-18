@@ -13,12 +13,12 @@ class TestEventModel(TestCase):
     These tests check that the model works as expected.
     """
 
-    # self refers to the instance that has been called by the class. It allows 
-    # methods to access data stored in that object, like the 
-    # test user and test event created in setUp(). Using self 
-    # means the same objects can be reused across multiple test 
+    # self refers to the instance that has been called by the class. It allows
+    # methods to access data stored in that object, like the
+    # test user and test event created in setUp(). Using self
+    # means the same objects can be reused across multiple test
     # methods without recreating them.
-    
+
     # Arrange: Set up test data for the Event model tests
     def setUp(self):
         """
@@ -52,7 +52,8 @@ class TestEventModel(TestCase):
         Test that the Event model's __str__ method
         returns the event title.
         """
-        # Assert: Check that the string representation of the event is its title
+        # Assert: Check that the string representation of the event is its
+        # title
         self.assertEqual(
             str(self.event),
             "Test Event",
@@ -76,14 +77,16 @@ class TestEventModel(TestCase):
             date=timezone.now() + timedelta(days=14),
             genre="Techno"
         )
-        # Assert: Check that the default status of the new event is Published (1)
+        # Assert: Check that the default status of the new event is Published
+        # (1)
         self.assertEqual(
             published_event.status,
             1,
             msg="Event status should default to Published"
         )
 
-    # Test that the creator ForeignKey correctly links the event to the user who created it
+    # Test that the creator ForeignKey correctly links the event to the user
+    # who created it
     def test_creator_relationship(self):
         """
         Test that the creator ForeignKey correctly
@@ -104,7 +107,8 @@ class TestEventModel(TestCase):
         If no lineup is provided, Django should
         store an empty string.
         """
-        # Assert: Check that the lineup field is an empty string when not provided
+        # Assert: Check that the lineup field is an empty string when not
+        # provided
         self.assertEqual(
             self.event.lineup,
             "",

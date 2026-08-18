@@ -7,13 +7,13 @@ from .models import Event, Comment, DJProfile
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     """
-    Customises how events are displayed and managedin the Django admin panel. 
-    A good reason to have an EventAdmin class is to customise how events are managed 
-    in Django Admin, like filtering, searching, and displaying 
-    specific information about events. This can help administrators 
+    Customises how events are displayed and managedin the Django admin panel.
+    A good reason to have an EventAdmin class is to customise how events are
+    managed in Django Admin, like filtering, searching, and displaying
+    specific information about events. This can help administrators
     manage user-generated content and maintain events on the site.
     """
-    
+
     list_display = (
         "title",
         "creator",
@@ -40,19 +40,20 @@ class EventAdmin(admin.ModelAdmin):
     prepopulated_fields = {
         "slug": ("title",)
     }
-    
+
+
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     """
     Customises how comments are displayed and managed
-    in the Django admin panel. A good eason to have 
-    a CommentAdmin class is to customise how comments are managed 
-    in Django Admin, such as filtering, searching, and displaying 
-    relevant information about comments. This can help administrators 
+    in the Django admin panel. A good eason to have
+    a CommentAdmin class is to customise how comments are managed
+    in Django Admin, such as filtering, searching, and displaying
+    relevant information about comments. This can help administrators
     manage user-generated content and maintain discussions on the site.
     """
 
-    # The list_display attribute specifies the fields to be displayed 
+    # The list_display attribute specifies the fields to be displayed
     # in the list view of comments in the admin panel.
     list_display = (
         "author",
@@ -68,21 +69,25 @@ class CommentAdmin(admin.ModelAdmin):
         "created_on",
     )
 
-    # The search_fields attribute enables a search box in the admin panel 
-    # to search comments based on the author's username, the event's title, or the comment body.
+    # The search_fields attribute enables a search box in the admin panel
+    # to search comments based on the author's username, the event's title, or
+    # the comment body.
     search_fields = (
         "author__username",
         "event__title",
         "body",
-    ) 
-    
+    )
+
+
 @admin.register(DJProfile)
 class DJProfileAdmin(admin.ModelAdmin):
     """
-    Customises how DJ profiles are displayed and managed in the Django admin panel. A good reason
-    to have a DJProfileAdmin class is to customise how DJ profiles are managed in Django Admin, 
-    such as filtering, searching, and displaying relevant information about DJ profiles. 
-    This can help administrators manage user-generated content and maintain DJ profiles on the site.
+    Customises how DJ profiles are displayed and managed in the Django admin
+    panel. A good reason to have a DJProfileAdmin class is to customise how
+    DJ profiles are managed in Django Admin, such as filtering, searching,
+    and displaying relevant information about DJ profiles. This can help
+    administrators manage user-generated content and maintain DJ profiles
+    on the site.
     """
 
     # Display useful DJ profile information in the admin list view.

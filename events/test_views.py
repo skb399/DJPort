@@ -77,26 +77,30 @@ class EventListViewTests(TestCase):
 
     def test_event_list_shows_message_when_there_are_no_published_events(self):
         """
-        Test that the event list view shows a message when there are no 
+        Test that the event list view shows a message when there are no
         published events.
         """
         # Delete the published event to simulate no published events
         self.published_event.delete()
         # Act: Make a GET request to the event list view
         response = self.client.get(reverse("event_list"))
-        # Assert: Check that the response contains the message indicating no 
+        # Assert: Check that the response contains the message indicating no
         # published events are available
-        self.assertContains(response,
+        self.assertContains(
+            response,
             "No published events are currently available."
-        )
-        self.assertNotContains(response, "Draft Event")
+            )
+        self.assertNotContains(
+            response,
+            "Draft Event"
+            )
 
     # -------------------------------------------------
     # Event Search Tests
     # --------------------------------------------------
     def test_search_finds_event_by_title(self):
         """
-        Test that searching by event title returns the matching published 
+        Test that searching by event title returns the matching published
         event.
         """
         # Act: Make a GET request to the event list view with a search query
@@ -330,7 +334,8 @@ class EventDetailViewTests(TestCase):
 
     def test_event_detail_returns_404_for_invalid_slug(self):
         """
-        Test that the event detail view returns a 404 response for an invalid slug
+        Test that the event detail view returns a 404 response for an invalid
+        slug
         """
         # Act: Make a GET request to the event detail view with a slug that
         # does not exist
@@ -495,7 +500,7 @@ class EventCreateViewTests(TestCase):
         # Assert: This proves that the user stays on the event creation page
         # and sees the form again, with validation errors displayed, instead
         # of being redirected to another page. The response status code is 200,
-        # indicating that the form was redisplayed, and the correct template 
+        # indicating that the form was redisplayed, and the correct template
         # is used.
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "events/event_form.html")
@@ -538,9 +543,9 @@ class EventEditViewTests(TestCase):
             lineup="Original DJ",
             status=1,
         )
-        # Store the URL for the event edit page using Django's reverse 
+        # Store the URL for the event edit page using Django's reverse
         # function. This allows us to refer to the URL by its name. The slug of
-        # the event passed as an argument to generate the correct URL for 
+        # the event passed as an argument to generate the correct URL for
         # editing this specific event. edit_url will be used to access the
         # event edit view.
         self.edit_url = reverse("event_edit", args=[self.event.slug])
@@ -577,7 +582,7 @@ class EventEditViewTests(TestCase):
             # edited.
             response.context["form"].instance,
             # This checks that the form is pre-filled with the data of the
-            # event being edited, ensuring that the user sees the current 
+            # event being edited, ensuring that the user sees the current
             # details of the event in the form fields.
             self.event,
         )
@@ -612,10 +617,10 @@ class EventEditViewTests(TestCase):
         # change when the title changes, so we need to refresh the event
         # instance to get the updated slug and other fields from the database.
         # refresh_from_db() is a method provided by Django's model instances
-        # that reloads the instance's data from the database, so that any 
-        # changes made to the instance in the database are reflected in the 
+        # that reloads the instance's data from the database, so that any
+        # changes made to the instance in the database are reflected in the
         # instance in memory. This is important after an update operation, as
-        # Django still has the old values stored in self.event until we 
+        # Django still has the old values stored in self.event until we
         # refresh from the database.
         self.event.refresh_from_db()
 
@@ -623,14 +628,21 @@ class EventEditViewTests(TestCase):
         self.assertEqual(self.event.title, "Updated Event")
         self.assertEqual(
             self.event.description,
-            "This event has been updated.")
+            "This event has been updated."
+            )
         self.assertEqual(self.event.venue, "Updated Venue")
         self.assertEqual(self.event.location, "Liverpool")
         self.assertEqual(self.event.genre, "Techno")
         self.assertEqual(self.event.lineup, "Updated DJ")
 
         # Assert: The user is redirected to the event detail page
-        self.assertRedirects(response, reverse("event_detail", args=[self.event.slug]))
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+                )
+            )
 
     def test_event_owner_can_update_event(self):
         """
@@ -664,7 +676,7 @@ class EventEditViewTests(TestCase):
         # Assert: Check that the existing event was updated with the new data
         # from the form submission
         self.assertEqual(self.event.title, "Updated Event")
-        # check that the description was updated correctly and message is 
+        # check that the description was updated correctly and message is
         # displayed on the event detail page
         self.assertEqual(
             self.event.description,
@@ -679,7 +691,13 @@ class EventEditViewTests(TestCase):
         self.assertEqual(self.event.lineup, "Updated DJ")
 
         # Assert: The owner is redirected to the event detail page
-        self.assertRedirects(response, reverse("event_detail", args=[self.event.slug]))
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+                )
+            )
 
     def test_non_owner_cannot_access_edit_page(self):
         """
@@ -693,7 +711,13 @@ class EventEditViewTests(TestCase):
         response = self.client.get(self.edit_url)
 
         # Assert: The user is redirected away from the edit page
-        self.assertRedirects(response, reverse("event_detail", args=[self.event.slug]))
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+                )
+            )
 
     def test_logged_out_user_is_redirected_from_edit_page(self):
         """
@@ -789,7 +813,7 @@ class EventDeleteViewTests(TestCase):
             status=1,
         )
 
-        # Store the URL for the event delete page using Django's reverse 
+        # Store the URL for the event delete page using Django's reverse
         # function. This allows us to refer to the URL by its name instead
         # of hardcoding it.
         self.delete_url = reverse("event_delete", args=[self.event.slug])
@@ -807,7 +831,7 @@ class EventDeleteViewTests(TestCase):
         # Act: Request the delete confirmation page
         response = self.client.get(self.delete_url)
 
-        # Assert: The confirmation page loads correctly, or the user is 
+        # Assert: The confirmation page loads correctly, or the user is
         # redirected to the event detail page if they are not the owner
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "events/event_confirm_delete.html")
@@ -839,7 +863,7 @@ class EventDeleteViewTests(TestCase):
         )
 
         # Assert: The event was removed from the database, making the event
-        # count zero, proving that the event is only deleted after a POST 
+        # count zero, proving that the event is only deleted after a POST
         # request.
         self.assertEqual(Event.objects.count(), 0)
 
@@ -857,7 +881,7 @@ class EventDeleteViewTests(TestCase):
         Test that a logged-in user cannot delete another user's event.
         """
         # Arrange: Log in as a different user, to check that only the event
-        # owner can delete the event. The other user should not have 
+        # owner can delete the event. The other user should not have
         # permission to delete this event.
         self.client.login(username="otheruser", password="testpassword")
 
@@ -867,7 +891,13 @@ class EventDeleteViewTests(TestCase):
 
         # Assert: The other user is redirected to the event detail page, and
         # the event is not deleted.
-        self.assertRedirects(response, reverse("event_detail", args=[self.event.slug]))
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+                )
+            )
 
         # Assert: The event still exists as the count of events in the
         # database is still 1, proving that the event was not deleted by a
@@ -1074,8 +1104,9 @@ class CommentViewTests(TestCase):
         # Assert: The comment with the body "This comment should not be saved."
         # does not exist in the database,
         self.assertFalse(
-            Comment.objects.filter(body="This comment should not be "
-                                       "saved.").exists()
+            Comment.objects.filter(
+                body="This comment should not be saved."
+                ).exists()
         )
 
     def test_empty_comment_is_not_saved(self):
@@ -1190,7 +1221,13 @@ class EditCommentViewTests(TestCase):
 
         # Assert: Check that the user is redirected back to the event detail
         # page.
-        self.assertRedirects(response, reverse("event_detail", args=[self.event.slug]))
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+                )
+            )
 
     def test_non_author_cannot_edit_comment(self):
         """
@@ -1205,7 +1242,13 @@ class EditCommentViewTests(TestCase):
         response = self.client.get(self.edit_url)
 
         # Assert: The user is redirected back to the event detail page.
-        self.assertRedirects(response, reverse("event_detail", args=[self.event.slug]))
+        self.assertRedirects(
+            response,
+            reverse(
+                "event_detail",
+                args=[self.event.slug]
+                )
+            )
 
         # Assert: The comment has not been changed.
         self.comment.refresh_from_db()
@@ -1491,7 +1534,8 @@ class FavouriteViewTests(TestCase):
         # Arrange: Log in as the test user
         self.client.login(username="favouriteuser", password="testpassword")
 
-        # Arrange: Add the event to the user's favourites before testing removal
+        # Arrange: Add the event to the user's favourites before testing
+        # removal
         self.event.favourited_by.add(self.user)
 
         # Act: Send a POST request to toggle the favourite status of the event
@@ -1574,8 +1618,9 @@ class FavouriteViewTests(TestCase):
         Test that the event detail view correctly identifies
         whether the logged-in user has favourited the event.
         """
-        # Arrange: Log in and favourite the event, so we can check that the event detail view
-        # correctly identifies the favourite status for the logged-in user.
+        # Arrange: Log in and favourite the event, so we can check that the
+        # event detail view correctly identifies the favourite status for the
+        # logged-in user.
         self.client.login(username="favouriteuser", password="testpassword")
 
         # Arrange: Add the event to the user's favourites so the
@@ -1928,7 +1973,7 @@ class DJProfileEditViewTests(TestCase):
 
         # Store the URL for viewing the DJ profile detail page using Django's
         # reverse function, which allows us to refer to the URL by its name
-        # instead of hardcoding it.This URL will be used to test viewing 
+        # instead of hardcoding it.This URL will be used to test viewing
         # the DJ profile.
         self.detail_url = reverse(
             "dj_profile_detail",
@@ -2026,7 +2071,6 @@ class DJProfileEditViewTests(TestCase):
         self.assertEqual(
             self.dj_profile.social_media,
             "https://instagram.com/updateddj"
-        )
         )
 
         # Assert: The user is redirected to the updated profile detail page.
@@ -2152,7 +2196,10 @@ class DJProfileDeleteViewTests(TestCase):
         # Store the URL for deleting the DJ profile using Django's reverse
         # function, which allows us to refer to the URL by its name instead of
         # hardcoding it.
-        self.delete_url = reverse("dj_profile_delete", args=[self.dj_profile.slug])
+        self.delete_url = reverse(
+            "dj_profile_delete",
+            args=[self.dj_profile.slug]
+            )
 
         # Store the URL for viewing the DJ profile detail page using Django's
         # reverse function, which allows us to refer to the URL by its name
@@ -2298,7 +2345,7 @@ class DJProfileDeleteViewTests(TestCase):
         self.assertTrue(
             DJProfile.objects.filter(
                 pk=self.dj_profile.pk).exists(
-                )               
+                )
             )
 
 
@@ -2769,9 +2816,8 @@ class DashboardTests(TestCase):
         # Assert: The response contains the message indicating that the user
         # has not created any events yet.
         self.assertContains(response, "You have not created any events yet.")
-        # Assert: The page shows a message because the user
+        # Assert: The response contains the message indicating that the user
         # has not favourited any events yet.
-        self.assertContains(
-            response,
-            "You have not favourited any events yet."
-        )
+        self.assertContains(response,
+                            "You have not favourited any events yet."
+                            )
