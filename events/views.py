@@ -160,13 +160,22 @@ def edit_comment(request, comment_id):
             instance=comment
         )
 
-        # If the submitted data is valid, update the existing comment.
         if comment_form.is_valid():
-            comment_form.save()
+            # Save the form without committing it to the database yet,
+            # so the approval status can be changed before saving.
+            updated_comment = comment_form.save(commit=False)
+
+            # Set the edited comment back to unapproved so that the updated
+            # content must be approved by the superuser before it is displayed.
+            updated_comment.approved = False
+
+            # Save the updated comment to the database.
+            updated_comment.save()
 
             messages.success(
                 request,
-                "Your comment has been updated successfully."
+                "Your comment has been updated successfully and is awaiting "
+                "approval."
             )
 
             return redirect(
@@ -294,6 +303,9 @@ def event_create(request):
 
             # Save the event to the database after setting the creator field
             event.save()
+            
+            # Display a success message to confirm that the event was created
+            messages.success(request, "Event created successfully.")
 
             # Redirect to the event detail page after successful creation
             return redirect("event_detail", slug=event.slug)
@@ -465,8 +477,12 @@ def event_delete(request, slug):
     if request.method == "POST":
         event.delete()
 
-        # The deleted event no longer has a usable detail page,
-        # so redirect the user to the event list.
+        # Display a success message so the user knows that the event was
+        # deleted successfully.
+        messages.success(request, "Event deleted successfully.")
+
+        # The deleted event no longer has a usable detail page, so redirect
+        # the user back to the event list.
         return redirect("event_list")
 
     context = {
