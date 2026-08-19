@@ -26,14 +26,13 @@
           <!-- Display the featured image if it exists-->
           {% if event.featured_image %}
           <!-- Optimise the Cloudinary image size and format to improve page loading performance -->
-          {% cloudinary event.featured_image width=800 height=600 crop="fill" quality="auto" fetch_format="auto" class="event-detail-image mt-4" alt=event.title %}
-          <!-- If no featured image is available, display a placeholder image -->
+          {% cloudinary event.featured_image width=800 height=600 crop="fit" quality="auto" fetch_format="auto" class="event-detail-image mt-4" alt=event.title %}
           {% else %}
-          <img
-            src="{% static 'images/djport_event_placeholder_image.webp' %}"
-            alt="Placeholder event image (no image available)"
-            class="event-detail-image mt-4"
-          >
+            <img
+              src="{% static 'images/djport_event_placeholder_image.webp' %}"
+              alt="Placeholder event image (no image available)"
+              class="event-detail-image mt-4"
+            >
           {% endif %}
         </div>
       </div>

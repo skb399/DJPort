@@ -48,8 +48,8 @@
     <div class="col-md-6 col-lg-4">
       <div class="card h-100">
         {% if profile.image %}
-        <!-- Optimise the Cloudinary image size and format to improve page loading performance -->
-        {% cloudinary profile.image width=600 height=600 crop="fill" quality="auto" fetch_format="auto" class="card-img-top dj-card-image" alt=profile.dj_name %}
+        <!-- Optimise the Cloudinary image while keeping the full DJ image visible -->
+        {% cloudinary profile.image width=600 height=600 crop="fit" quality="auto" fetch_format="auto" class="card-img-top dj-card-image" alt=profile.dj_name %}
         {% else %}
             <img
                 src="{% static 'images/djport_dj_placeholder_image.webp' %}"
@@ -57,7 +57,7 @@
                 alt="Placeholder DJ profile image"
             >
         {% endif %}
-
+        
         <div class="card-body">
           <h2 class="card-title h4 text-center mb-3">{{ profile.dj_name }}</h2>
           <p class="card-text"><strong>Genres:</strong> {{ profile.genres }}</p>
