@@ -12,6 +12,17 @@
       <div class="card event-detail-card">
         <div class="card-body p-4">
           <h1 class="text-center mb-4">{{ event.title }}</h1>
+          <!-- Display the featured image if it exists-->
+          {% if event.featured_image %}
+          <!-- Optimise the Cloudinary image size and format to improve page loading performance -->
+          {% cloudinary event.featured_image width=800 height=600 crop="fit" quality="auto" fetch_format="auto" class="event-detail-image mb-4" alt=event.title %}
+          {% else %}
+            <img
+              src="{% static 'images/djport_event_placeholder_image.webp' %}"
+              alt="Placeholder event image (no image available)"
+              class="event-detail-image mb-4"
+            >
+          {% endif %}
           <p><strong>Creator:</strong> {{ event.creator }}</p>
           <!-- Display the event date in a readable format -->
           <p><strong>Date:</strong> {{ event.date|date:"D d M Y, H:i" }}</p>
@@ -22,17 +33,6 @@
           <!-- Display the lineup if it exists -->
           {% if event.lineup %}
           <p><strong>Lineup:</strong> {{ event.lineup }}</p>
-          {% endif %}
-          <!-- Display the featured image if it exists-->
-          {% if event.featured_image %}
-          <!-- Optimise the Cloudinary image size and format to improve page loading performance -->
-          {% cloudinary event.featured_image width=800 height=600 crop="fit" quality="auto" fetch_format="auto" class="event-detail-image mt-4" alt=event.title %}
-          {% else %}
-            <img
-              src="{% static 'images/djport_event_placeholder_image.webp' %}"
-              alt="Placeholder event image (no image available)"
-              class="event-detail-image mt-4"
-            >
           {% endif %}
         </div>
       </div>
