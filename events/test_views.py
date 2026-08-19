@@ -4,6 +4,10 @@ from django.urls import reverse
 from django.utils import timezone
 from .models import Event, Comment, DJProfile
 
+# Some testing patterns in this file were informed by the
+# Code Institute Codestar Blog walkthrough project.
+# Tests have been adapted and expanded for DJ Port's views,
+# permissions and application-specific functionality.
 
 class EventListViewTests(TestCase):
     # Arrange: Set up test data for the EventListView tests

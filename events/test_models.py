@@ -6,6 +6,10 @@ from django.utils import timezone
 
 from .models import Event, DJProfile, Comment
 
+# Some testing patterns in this file were informed by the
+# Code Institute Codestar Blog walkthrough project.
+# Tests have been adapted and expanded for DJ Port's models
+# and application-specific behaviour.
 
 class TestEventModel(TestCase):
     """

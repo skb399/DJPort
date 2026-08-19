@@ -1,6 +1,11 @@
 from django import forms
 from .models import Comment, Event, DJProfile
 
+# Some testing patterns in this file were informed by the
+# Code Institute Codestar Blog walkthrough project.
+# Tests have been adapted and expanded for DJ Port's forms
+# and validation requirements.
+
 
 class EventForm(forms.ModelForm):
     """
@@ -26,6 +31,10 @@ class EventForm(forms.ModelForm):
         # datetime-local input type, which allows users to select both date and
         # time in a single input field. The format is set to match the expected
         # input format for this type of field.
+        # DateTimeInput configuration adapted from the Django forms widget
+        # documentation. Modified for DJ Port to use an HTML5 datetime-local
+        # input and the format required by the Event model form.
+        # https://docs.djangoproject.com/en/6.0/ref/forms/widgets/
         widgets = {
             "date": forms.DateTimeInput(
                 attrs={"type": "datetime-local"},

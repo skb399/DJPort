@@ -57,6 +57,12 @@ class Event(models.Model):
     # from the event title before the event is saved to the database.
     # If another event already uses the same slug, a number is added
     # to the end of the slug to keep each event URL unique.
+    # Unique slug generation informed by Django's slugify documentation
+    # and research into approaches for handling duplicate slugs:
+    # https://docs.djangoproject.com/en/5.2/ref/utils/#django.utils.text.slugify
+    # https://stackoverflow.com/questions/11978035/django-unique-slug-by-id
+    # Adapted for DJ Port so duplicate event titles receive an
+    # incrementing suffix while keeping existing URLs unchanged.
     def save(self, *args, **kwargs):
         """
         Generate a unique slug from the event title before saving.
@@ -186,8 +192,14 @@ class DJProfile(models.Model):
         # DJ profile is edited.
         if not self.slug:
 
-            # Convert the DJ name into a URL-friendly slug.
-            # For example: "DJ Pulse" becomes "dj-pulse".
+            # Convert the DJ name into a URL-friendly slug.For example:
+            # "DJ Pulse" becomes "dj-pulse". Unique slug generation informed
+            # by Django's slugify documentation and research into approaches
+            # for handling duplicate slugs:
+            # https://docs.djangoproject.com/en/5.2/ref/utils/#django.utils.text.slugify
+            # https://stackoverflow.com/questions/11978035/django-unique-slug-by-id
+            # Adapted for DJ Port so duplicate titles/names receive an
+            # incrementing suffix.
             base_slug = slugify(self.dj_name)
 
             # First try using the basic slug without a number.

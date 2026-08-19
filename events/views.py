@@ -96,7 +96,10 @@ def event_detail(request, slug):
 
     return render(request, "events/event_detail.html", context)
 
-
+# Comment CRUD structure informed by the Code Institute
+# Codestar Blog walkthrough project.
+# Adapted and expanded for DJ Port's Event and Comment models,
+# including ownership checks and comment moderation.
 @login_required
 def add_comment(request, slug):
     """
@@ -248,7 +251,9 @@ def delete_comment(request, comment_id):
         context
     )
 
-
+# Favourite toggle pattern informed by:
+# https://dev.to/radualexandrub/how-to-add-like-unlike-button-to-your-django-blog-5gkg
+# Adapted for DJ Port's Event favourites many-to-many relationship.
 # Decorator "@login_required" to ensure that only logged-in users can access
 # the toggle_favourite view.
 @login_required
